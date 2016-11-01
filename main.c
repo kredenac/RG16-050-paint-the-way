@@ -91,7 +91,7 @@ void onReshape(int width, int height)
 
 static float eyex=0, eyey=0.5, eyez=2;
 static float rotWorld=0;
-static float viewAngle=270;
+static float viewAzimuth=270, viewElevation=-10;
 static float lookAtx=0, lookAty=0, lookAtz=0;
 static float upx=0, upy=1, upz=0;
 
@@ -102,11 +102,15 @@ void onDisplay(void)
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 
-    lookAtx=cos(M_PI*viewAngle/180);
-    lookAtz=sin(M_PI*viewAngle/180);
+    /*azuriranje lookat na osnovu levo-desno rotacije*/
+    lookAtx=cos(M_PI*viewAzimuth/180);
+    lookAtz=sin(M_PI*viewAzimuth/180);
+    /*azuriranje lookat na osnovu gore-dole rotacije*/
+    lookAty=sin(M_PI*viewElevation/180);
 
     lookAtx=eyex+lookAtx;
     lookAtz=eyez+lookAtz;
+    lookAty=eyey+lookAty;
     gluLookAt(eyex, eyey,eyez ,//0,0,2
        lookAtx, lookAty, lookAtz,
        upx, upy, upz);
@@ -160,40 +164,51 @@ void onDisplay(void)
     glutSwapBuffers();
 }
 
-static float viewAngleGoal=270;
-static float viewAngledt=30;
+static float viewAzimuthGoal=270, viewElevationGoal=-10;
+static float viewAzimuthdt=30, viewElevationdt=20;
 
 static void onSpecialInputUp(int key, int x, int y)
 {
     switch(key)
     {
         case GLUT_KEY_RIGHT:
-            viewAngleGoal=viewAngle;
+            viewAzimuthGoal=viewAzimuth;
             break;
         case GLUT_KEY_LEFT:
-            viewAngleGoal=viewAngle;
+            viewAzimuthGoal=viewAzimuth;
+            break;
+        case GLUT_KEY_UP:
+            viewElevationGoal=viewElevation;
+            break;
+        case GLUT_KEY_DOWN:
+            viewElevationGoal=viewElevation;
             break;
     }
 }
-
+#define MAX_ELEVATION 89
 void onSpecialInput(int key, int x, int y)
 {
 
     switch(key)
     {
         case GLUT_KEY_RIGHT:
-            viewAngleGoal+=viewAngledt;
+            viewAzimuthGoal+=viewAzimuthdt;
             break;
         case GLUT_KEY_LEFT:
-            viewAngleGoal-=viewAngledt;
+            viewAzimuthGoal-=viewAzimuthdt;
             break;
         case GLUT_KEY_UP:
-            rotWorld+=10;
+            viewElevationGoal+=viewElevationdt;
+            if (viewElevationGoal>MAX_ELEVATION)
+                viewElevationGoal=MAX_ELEVATION;
             break;
         case GLUT_KEY_DOWN:
-            rotWorld-=10;
+            viewElevationGoal-=viewElevationdt;
+            if (viewElevationGoal<-MAX_ELEVATION)
+                viewElevationGoal=-MAX_ELEVATION;
             break;
     }
+
 }
 
 void onKeyboardUp(unsigned char key, int x, int y)
@@ -251,26 +266,16 @@ void onKeyboard(unsigned char key, int x, int y)
         case('r'):
             player=playerInit;
             break;
+        case 'm':
+            rotWorld+=10;
+            break;
+        case 'n':
+            rotWorld-=10;
+            break;
     }
 }
 
 
-
-void drawSquare(Object o)
-{
-    float height=o.height/2;
-    float width=o.width/2;
-    float* color=o.color;
-
-    glColor3f(color[0],color[1],color[2]);
-    glBegin(GL_QUADS);
-        glVertex3f(o.posx + width, o.posy + height, 0);
-        glVertex3f(o.posx - width, o.posy + height, 0);
-        glVertex3f(o.posx - width, o.posy - height, 0);
-        glVertex3f(o.posx + width, o.posy - height, 0);
-    glEnd();
-
-}
 
 #define DT_MAX 60
 
@@ -317,7 +322,12 @@ void onTimerUpdate(int id)
     eyez+=f[2]*cameraVForward;
     eyex+=f[0]*cameraVForward;
     /*rotacija kamere*/
-    viewAngle=approach(viewAngleGoal, viewAngle, dt/(float)20);
+    viewAzimuth=approach(viewAzimuthGoal, viewAzimuth, dt/(float)20);
+
+    viewElevation=approach(viewElevationGoal, viewElevation, dt/(float)20);
+    if (viewElevation>MAX_ELEVATION){
+        viewElevation=MAX_ELEVATION;
+    }
     glutPostRedisplay();
     if (animationOngoing){
         glutTimerFunc(UPDATE_TIMER_INTVAL, onTimerUpdate, TIMER_UPDATE_ID);
@@ -351,6 +361,21 @@ float* moveForwardCam(void)
     return v;
 }
 
+void drawSquare(Object o)
+{
+    float height=o.height/2;
+    float width=o.width/2;
+    float* color=o.color;
+
+    glColor3f(color[0],color[1],color[2]);
+    glBegin(GL_QUADS);
+        glVertex3f(o.posx + width, o.posy + height, 0);
+        glVertex3f(o.posx - width, o.posy + height, 0);
+        glVertex3f(o.posx - width, o.posy - height, 0);
+        glVertex3f(o.posx + width, o.posy - height, 0);
+    glEnd();
+
+}
 
 /*
 int collision(Object player, Wall o)
