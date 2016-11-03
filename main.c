@@ -8,8 +8,10 @@
 typedef struct{
     float posx;
     float posy;
+    float posz;
     float vx;
     float vy;
+    float vz;
     float height;
     float width;
     float color[3];
@@ -22,13 +24,17 @@ typedef struct{
 
 
 static int dt;
-static float JUMP_V=0.04;
+static float JUMP_V=0.1;
 static float playerGoalvx;
 static float playerGoalvy;
+static float playerGoalvz;
 static float aspectRatio=1/*16/9.0*/;
 static int animationOngoing=1;
 static Object player;
-static const Object playerInit={-0.5, 0, 0, 0, 0.1, 0.1,{1,1,1}};
+static const Object playerInit={0, 1, 0,
+    0, 0, 0,
+    1, 0.1,
+    {0,0,0} };
 
 static void onDisplay(void);
 static void onReshape(int width, int height);
@@ -129,7 +135,6 @@ void onDisplay(void)
         glVertex3f(1,-1,1);
     glEnd();
     glPopMatrix();
-    drawSquare(player);
     /*x,y,z, ose*/
     glBegin(GL_LINES);
         glColor3f(1,1,1);
@@ -221,10 +226,10 @@ void onKeyboardUp(unsigned char key, int x, int y)
             playerGoalvx=0;
             break;
         case('w'):
-            playerGoalvy=0;
+            playerGoalvz=0;
             break;
         case('s'):
-            playerGoalvy=0;
+            playerGoalvz=0;
             break;
         case(' '):
             playerGoalvy=0;
@@ -252,10 +257,10 @@ void onKeyboard(unsigned char key, int x, int y)
             }
             break;
         case('s'):
-            playerGoalvy=-0.05;
+            playerGoalvz=-0.05;
             break;
         case('w'):
-            playerGoalvy=0.05;
+            playerGoalvz=0.05;
             break;
         case('a'):
             playerGoalvx=-0.05;
@@ -278,6 +283,7 @@ void onKeyboard(unsigned char key, int x, int y)
 
 
 #define DT_MAX 60
+#define PLAYER_HEIGHT 1
 
 static float cameraVForward=0;
 static float cameraVSide=0;
@@ -297,21 +303,22 @@ void onTimerUpdate(int id)
         dt=DT_MAX;
 
     /*pomeraj*/
-    player.posx+=player.vx;
+    player.vy=approach(playerGoalvy, player.vy, dt/(float)500);
     player.posy+=player.vy;
     /*kolizija*/
-    /*kolizija sa podom, bonuce*/
-    /*if (player.posy - player.height/2 <=-1) {
-        player.posy=-1+player.height/2;
-        player.vy=-player.vy/2;
-    }*/
+    /*kolizija sa podom*/
+    player.posy-=0.02;//gravity
+    eyey=player.posy;
+    if (eyey - PLAYER_HEIGHT <-1) {
+        player.posy=0;
+        player.vy=0;
+    }
     /*brzine*/
-    player.vx=approach(playerGoalvx,player.vx,dt/(float)5000);
 
     /*vektori r i f kretanja u odnosu na kameru*/
     float * r=moveRightCam();
     float * f=moveForwardCam();
-    cameraVForward=approach(playerGoalvy, cameraVForward, dt/(float)5000);
+    cameraVForward=approach(playerGoalvz, cameraVForward, dt/(float)5000);
     cameraVSide=approach(playerGoalvx, cameraVSide, dt/(float)5000);
 
     /*levo-desno u odnosu na kameru*/
@@ -361,22 +368,6 @@ float* moveForwardCam(void)
     return v;
 }
 
-void drawSquare(Object o)
-{
-    float height=o.height/2;
-    float width=o.width/2;
-    float* color=o.color;
-
-    glColor3f(color[0],color[1],color[2]);
-    glBegin(GL_QUADS);
-        glVertex3f(o.posx + width, o.posy + height, 0);
-        glVertex3f(o.posx - width, o.posy + height, 0);
-        glVertex3f(o.posx - width, o.posy - height, 0);
-        glVertex3f(o.posx + width, o.posy - height, 0);
-    glEnd();
-
-}
-
 /*
 int collision(Object player, Wall o)
 {
@@ -391,7 +382,7 @@ int collision(Object player, Wall o)
     return 0;
 }*/
 
-/*funkcija linearne interpolacije. sluzi da se postepeno pomera brzina objekta*/
+/*funkcija linearne interpolacije. sluzi da se postepeno povecava brzina*/
 float approach(float goal, float curr, float dt)
 {
     float diff=goal-curr;
@@ -404,8 +395,6 @@ float approach(float goal, float curr, float dt)
     return goal;
 }
 
-
-
 void setColor(Object* op, float r, float g, float b)
 {
     op->color[0]=r;
@@ -413,12 +402,11 @@ void setColor(Object* op, float r, float g, float b)
     op->color[2]=b;
 }
 
-
-
 void resetGame(void)
 {
     playerGoalvx=0;
     playerGoalvy=0;
+    playerGoalvz=0;
     animationOngoing=1;
     glutTimerFunc(UPDATE_TIMER_INTVAL, onTimerUpdate,TIMER_UPDATE_ID);
     player=playerInit;
