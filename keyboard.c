@@ -11,16 +11,16 @@ void onSpecialInputUp(int key, int x, int y)
 {
     switch(key)
     {
-        case GLUT_KEY_RIGHT:
+        case (GLUT_KEY_RIGHT):
             viewAzimuth.goal=viewAzimuth.curr;
             break;
-        case GLUT_KEY_LEFT:
+        case (GLUT_KEY_LEFT):
             viewAzimuth.goal=viewAzimuth.curr;
             break;
-        case GLUT_KEY_UP:
+        case (GLUT_KEY_UP):
             viewElevation.goal=viewElevation.curr;
             break;
-        case GLUT_KEY_DOWN:
+        case (GLUT_KEY_DOWN):
             viewElevation.goal=viewElevation.curr;
             break;
     }
@@ -32,18 +32,18 @@ void onSpecialInput(int key, int x, int y)
 
     switch(key)
     {
-        case GLUT_KEY_RIGHT:
+        case (GLUT_KEY_RIGHT):
             viewAzimuth.goal+=viewAzimuthdt;
             break;
-        case GLUT_KEY_LEFT:
+        case (GLUT_KEY_LEFT):
             viewAzimuth.goal-=viewAzimuthdt;
             break;
-        case GLUT_KEY_UP:
+        case (GLUT_KEY_UP):
             viewElevation.goal+=viewElevationdt;
             if (viewElevation.goal>MAX_ELEVATION)
                 viewElevation.goal=MAX_ELEVATION;
             break;
-        case GLUT_KEY_DOWN:
+        case (GLUT_KEY_DOWN):
             viewElevation.goal-=viewElevationdt;
             if (viewElevation.goal<-MAX_ELEVATION)
                 viewElevation.goal=-MAX_ELEVATION;
@@ -81,7 +81,10 @@ void onKeyboard(unsigned char key, int x, int y)
             exit(0);
             break;
         case(' '):
-            player.vy.goal=JUMP_V;
+            if (!state.jumping){
+                player.vy.goal=JUMP_V;
+                state.jumping=1;
+            }
             break;
         case('S'):
             if (!animationOngoing){
@@ -105,10 +108,10 @@ void onKeyboard(unsigned char key, int x, int y)
         case('r'):
             player=playerInit;
             break;
-        case 'm':
+        case ('m'):
             rotWorld+=10;
             break;
-        case 'n':
+        case ('n'):
             rotWorld-=10;
             break;
     }
@@ -123,5 +126,5 @@ void onReshape(int width, int height)
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(60, (float) width / height, 1, 1500);
+    gluPerspective(60, (float) width / height, 0, 1500);
 }

@@ -20,6 +20,11 @@ typedef struct{
     float color[3];
 }Object;
 
+typedef struct{
+    int jumping;
+
+}State;
+extern State state;
 /*relativna pozicija visine glave u odnosu na centar tela
 * sluzi za pozicioniranje kamere*/
 extern float playerHeadHeight;

@@ -1,28 +1,33 @@
 #include "player.h"
 #include "miscfunc.h"
+
 const Object playerInit={
     .posx=0, .posy=1, .posz=2,
     .vx={0,0}, .vy={0.0}, .vz={0,0},
     .length=0.5, .height=1.5, .width=0.5,
     .color={0,0,0}
 };
+
+State state={
+    .jumping=0
+};
+
 Object player;
-float playerHeadHeight=0.2;
-float JUMP_V=0.1;
+
 extern Object player;
 extern int dt;
 
-float rotWorld=0;
-Val2f viewAzimuth={.curr=270, .goal=270};
-Val2f viewElevation={.curr=-10, .goal=-10};
-float eyex=0, eyey=1, eyez=2;
-float lookAtx=0, lookAty=0, lookAtz=0;
-float upx=0, upy=1, upz=0;
-
+float rotWorld;
+Val2f viewAzimuth;
+Val2f viewElevation;
+float eyex, eyey, eyez;
+float lookAtx, lookAty, lookAtz;
+float upx, upy, upz;
+float playerHeadHeight=0.2;
+float JUMP_V=0.1;
 
 static float* moveRightCam(void);
 static float* moveForwardCam(void);
-extern float approach(float goal, float curr, float dt);
 
 void movePlayer(){
     float * r=moveRightCam();
