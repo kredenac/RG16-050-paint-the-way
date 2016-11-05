@@ -1,5 +1,5 @@
-main: main.c
-	gcc main.c -o main -lGL -lGLU -lglut -lm -g -Wall
+main: main.c player.c keyboard.c
+	gcc main.c player.c keyboard.c miscfunc.c -o main -lGL -lGLU -lglut -lm -g -Wall
 
 clean:
 	rm main
