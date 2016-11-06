@@ -17,36 +17,43 @@ static void updateCamAngle(void);
 int hasCollision(Object a, Object b);
 int rangeIntersect(float mina, float maxa, float minb, float maxb);
 void drawCube(Object o);
+void drawWithColor(Object o);
 /*bice izbrisane funkcije:*/
 void room(float size);
 #define NUM_CUBES 6
 Object cubes[6];
 void initCubes()
 {
+    float val=2;
     cubes[0]=(Object){
-        .posx=-1, .posy=0, .posz=0,
-        .length=1, .height=1, .width=1,
+        .posx=-val, .posy=0, .posz=0,
+        .length=val, .height=val, .width=val,
         .color={0.2,0,0}
     };
     cubes[1]=(Object){
-        .posx=1, .posy=0, .posz=0,
-        .length=1, .height=1, .width=1,
+        .posx=val, .posy=0, .posz=0,
+        .length=val, .height=val, .width=val,
         .color={0.3,0,0}
     };
     cubes[2]=(Object){
-        .posx=0, .posy=-1, .posz=0,
-        .length=1, .height=1, .width=1,
+        .posx=0, .posy=-val, .posz=0,
+        .length=val, .height=val, .width=val,
         .color={0,0.2,0}
     };
     cubes[3]=(Object){
-        .posx=0, .posy=1, .posz=0,
-        .length=1, .height=1, .width=1,
+        .posx=0, .posy=val, .posz=0,
+        .length=val, .height=val, .width=val,
         .color={0,0.3,0}
     };
     cubes[4]=(Object){
-        .posx=0, .posy=0, .posz=-1,
-        .length=1, .height=1, .width=1,
+        .posx=0, .posy=0, .posz=-val,
+        .length=val, .height=val, .width=val,
         .color={0,0,0.2}
+    };
+    cubes[5]=(Object){
+        .posx=0, .posy=0, .posz=0,
+        .length=0.5, .height=0.5, .width=0.5,
+        .color={0,0,0}
     };
 }
 int main(int argc, char ** argv)
@@ -99,15 +106,14 @@ void moveBullets(void)
 
 void drawBullets(void)
 {
-    float x, y, z, br, bg, bb;
+    float x, y, z;
     int i;
     for (i=0;i<MAX_BULLETS;i++){
         if (bullets_active[i]){
             x=bullets[i].posx,y=bullets[i].posy,z=bullets[i].posz;
-            br=bullets[i].color[0], bg=bullets[i].color[1], bb=bullets[i].color[2];
             glPushMatrix();
             glTranslatef(x,y,z);
-            glColor3f(br,bg,bb);
+            drawWithColor(bullets[i]);
             glutSolidSphere(bullets[i].length, 20, 10);
             glPopMatrix();
         }
@@ -147,45 +153,63 @@ int hasCollision(Object a, Object b)
 }
 void drawCube(Object o)
 {
-    glColor3f(o.color[0],o.color[1],o.color[2]);
+    drawWithColor(o);
     glPushMatrix();
     glTranslatef(o.posx, o.posy, o.posz);
     glutSolidCube(o.length);
     glPopMatrix();
 }
-static Object cube={
-    .posx=0, .posy=0, .posz=0,
-    .vx={0,0}, .vy={0.0}, .vz={0,0},
-    .length=0.5, .height=0.5, .width=0.5,
-    .color={0,0,0}
-};
 
+void drawWithColor(Object o)
+{
+    GLfloat diffuse_coeffs[] = { o.color[0],o.color[1],o.color[2], 1 };
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_coeffs);
+}
 void onDisplay(void)
 {
+    /* Pozicija svetla (u pitanju je direkcionalno svetlo). */
+    GLfloat light_position[] = { 1, 1, 1, 0 };
+    /* Ambijentalna boja svetla. */
+    GLfloat light_ambient[] = { 0.1, 0.1, 0.5, 1 };
+    /* Difuzna boja svetla. */
+    GLfloat light_diffuse[] = { 0.7, 0.7, 0.6, 1 };
+    /* Spekularna boja svetla. */
+    GLfloat light_specular[] = { 0.9, 0.9, 0.9, 1 };
+
+    /* Koeficijenti ambijentalne refleksije materijala. */
+    GLfloat ambient_coeffs[] = { 0.1, 0.1, 0.1, 1 };
+    /* Koeficijenti difuzne refleksije materijala. */
+    GLfloat diffuse_coeffs[] = { 0, 0, 0.7, 1 };
+    /* Koeficijenti spekularne refleksije materijala. */
+    GLfloat specular_coeffs[] = { 1, 1, 1, 1 };
+
+    GLfloat shininess = 20;
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    /*ajde jbt*/
+
     positionCam();
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-
-
     glRotatef(rotWorld,0,1,0);
 
+    /* Ukljucuje se osvjetljenje i podesavaju parametri svetla. */
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT0);
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
+    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
 
+    glMaterialfv(GL_FRONT, GL_AMBIENT, ambient_coeffs);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_coeffs);
+    glMaterialfv(GL_FRONT, GL_SPECULAR, specular_coeffs);
+    glMaterialf(GL_FRONT, GL_SHININESS, shininess);
+    /*****/
     /*6 zidova sobe-strane kocke*/
     room(1);
-
     drawAxis();
-    /*ova kolizija radi*/
-    drawCube(cube);
-
-    //printf("%d\n",hit);
-    /*TEST iscrtavanje metka i pomeranje*/
-
     drawBullets();
-
-    /*TEST*/
 
     glTranslatef(-1.6, 0, -3);
         glColor3f(1, 0, 1);
@@ -201,14 +225,14 @@ void room(float size)
     glPushMatrix();
     glScalef(size,size,size);
     int i;
-    for (i=0;i<NUM_CUBES-1;i++){
+    for (i=0;i<NUM_CUBES;i++){
         drawCube(cubes[i]);
     }
     glPopMatrix();
 }
 
-const float FLOOR=-1;
 
+static float FLOOR=-1;
 void onTimerUpdate(int id)
 {
     if (TIMER_UPDATE_ID!=id){
@@ -223,7 +247,7 @@ void onTimerUpdate(int id)
     /*prodji kroz sve slotove, ako je aktivan metak proveri koliziju sa kockama*/
     for (i=0; i<MAX_BULLETS; i++){
         if (bullets_active[i]){
-            for (j=0; j<NUM_CUBES-1; j++){
+            for (j=0; j<NUM_CUBES; j++){
                 if (hasCollision(cubes[j],bullets[i])){
                     bullets_active[i]=0;
                     setColor(&cubes[j],bullets[i].color[0],bullets[i].color[1],bullets[i].color[2]);
