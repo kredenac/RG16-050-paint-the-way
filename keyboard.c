@@ -77,8 +77,8 @@ void onKeyboard(unsigned char key, int x, int y)
 {
 
     switch(key){
-        case(27):
-            exit(0);
+        case('f'):
+            firePaint();
             break;
         case(' '):
             if (!state.jumping){
@@ -114,6 +114,18 @@ void onKeyboard(unsigned char key, int x, int y)
         case ('n'):
             rotWorld-=10;
             break;
+        case ('1'):
+            state.fireColor=1;
+            break;
+        case ('2'):
+            state.fireColor=2;
+            break;
+        case ('3'):
+            state.fireColor=3;
+            break;
+        case(27):
+            exit(0);
+            break;
     }
     //printf("feet pos: x=%f, y=%f, z=%f\n",player.posx,player.posy-player.height/2,player.posz);
 }
@@ -126,5 +138,5 @@ void onReshape(int width, int height)
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(60, (float) width / height, 0, 1500);
+    gluPerspective(45.0, (float) width / height, 0.1, 100.0);
 }

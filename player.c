@@ -7,14 +7,18 @@ const Object playerInit={
     .length=0.5, .height=1.5, .width=0.5,
     .color={0,0,0}
 };
-
+const Object bulletInit={
+    .posx=0, .posy=0, .posz=0,
+    .vx={0,0}, .vy={0.0}, .vz={0,0},
+    .length=0.1, .height=0.1, .width=0.1,
+    .color={1,1,1}
+};
 State state={
-    .jumping=0
+    .jumping=0,
+    .fireColor=1
 };
 
 Object player;
-
-extern Object player;
 extern int dt;
 
 float rotWorld;
@@ -72,4 +76,45 @@ static float* moveForwardCam(void)
     v[2]=lookAtz-eyez;
 
     return v;
+}
+
+#define MAX_BULLETS 30
+Object bullets[MAX_BULLETS];
+int bullets_active[MAX_BULLETS];
+
+
+void firePaint()
+{
+    int i=0;
+    float r,g,b;
+    bullets_active[i]=1;
+    bullets[i]=bulletInit;
+    bullets[i].posx=player.posx;
+    bullets[i].posy=player.posy;
+    bullets[i].posz=player.posz;
+    switch(state.fireColor){
+        case(1):
+            r=1,g=1,b=1;
+            break;
+        case(2):
+            r=0,g=0,b=1;
+            break;
+        case(3):
+            r=1,g=0.3,b=0.1;
+            break;
+    }
+    setColor(&bullets[i], r, g, b);
+    float * v=moveForwardCam();
+    bullets[i].vx.curr=v[0]/50;
+    bullets[i].vy.curr=v[1]/50;
+    bullets[i].vz.curr=v[2]/50;
+
+}
+
+void resetBullets()
+{
+    int i;
+    for (i=0;i<MAX_BULLETS;i++){
+        bullets_active[i]=0;
+    }
 }

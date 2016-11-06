@@ -22,14 +22,16 @@ typedef struct{
 
 typedef struct{
     int jumping;
-
+    int fireColor;
 }State;
+
 extern State state;
 /*relativna pozicija visine glave u odnosu na centar tela
 * sluzi za pozicioniranje kamere*/
 extern float playerHeadHeight;
 extern const Object playerInit;
 extern void movePlayer();
+extern void firePaint();
 
 extern Object player;
 
@@ -47,5 +49,6 @@ extern float eyex, eyey, eyez;
 extern float lookAtx, lookAty, lookAtz;
 extern float upx, upy, upz;
 
-
+extern Object bullets[];
+extern int bullets_active[];
 #endif
