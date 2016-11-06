@@ -130,6 +130,7 @@ void onKeyboard(unsigned char key, int x, int y)
     //printf("feet pos: x=%f, y=%f, z=%f\n",player.posx,player.posy-player.height/2,player.posz);
 }
 
+
 void onReshape(int width, int height)
 {
     width=aspectRatio*height;

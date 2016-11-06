@@ -1,5 +1,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
+
+#define MAX_BULLETS 77
 /*sluzi za cuvanje trenutnog i ciljnog stanja*/
 typedef struct{
     float curr;

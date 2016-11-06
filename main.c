@@ -14,7 +14,41 @@ static void updatedt(void);
 static void positionCam(void);
 static void drawAxis(void);
 static void updateCamAngle(void);
-
+int hasCollision(Object a, Object b);
+int rangeIntersect(float mina, float maxa, float minb, float maxb);
+void drawCube(Object o);
+/*bice izbrisane funkcije:*/
+void room(float size);
+#define NUM_CUBES 6
+Object cubes[6];
+void initCubes()
+{
+    cubes[0]=(Object){
+        .posx=-1, .posy=0, .posz=0,
+        .length=1, .height=1, .width=1,
+        .color={0.2,0,0}
+    };
+    cubes[1]=(Object){
+        .posx=1, .posy=0, .posz=0,
+        .length=1, .height=1, .width=1,
+        .color={0.3,0,0}
+    };
+    cubes[2]=(Object){
+        .posx=0, .posy=-1, .posz=0,
+        .length=1, .height=1, .width=1,
+        .color={0,0.2,0}
+    };
+    cubes[3]=(Object){
+        .posx=0, .posy=1, .posz=0,
+        .length=1, .height=1, .width=1,
+        .color={0,0.3,0}
+    };
+    cubes[4]=(Object){
+        .posx=0, .posy=0, .posz=-1,
+        .length=1, .height=1, .width=1,
+        .color={0,0,0.2}
+    };
+}
 int main(int argc, char ** argv)
 {
     glutInit(&argc,argv);
@@ -29,35 +63,103 @@ int main(int argc, char ** argv)
     glutKeyboardUpFunc(onKeyboardUp);
     glutSpecialFunc(onSpecialInput);
     glutSpecialUpFunc(onSpecialInputUp);
-    /*pls work*/
+
     glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
-    /*pls work*/
-    glClearColor(0, 0, 0, 0);
 
+    glClearColor(0, 0, 0, 0);
+    initCubes();
     dt=glutGet(GLUT_ELAPSED_TIME);
     srand(time(NULL));
     resetGame();
     glutMainLoop();
     return 0;
 }
-/*void room(float size)
+
+/*todo skloni da ne budu na ovako ruznom mestu ove vars*/
+float tr=0.5,tg=0.5,tb=0.5;
+void moveBullets(void)
 {
+    int i;
+    for (i=0;i<MAX_BULLETS;i++)
+        if (bullets_active[i]){
+            bullets[i].posx+=bullets[i].vx.curr;
+            bullets[i].posy+=bullets[i].vy.curr;
+            bullets[i].posz+=bullets[i].vz.curr;
+            /*kvazi kolizija*/
+            if (bullets[i].posy<=-5){//-5 jer mi je tu pod.. fix it
+                bullets_active[i]=0;
+                tr=bullets[i].color[0];
+                tg=bullets[i].color[1];
+                tb=bullets[i].color[2];
+            }
+    }
+}
+
+void drawBullets(void)
+{
+    float x, y, z, br, bg, bb;
+    int i;
+    for (i=0;i<MAX_BULLETS;i++){
+        if (bullets_active[i]){
+            x=bullets[i].posx,y=bullets[i].posy,z=bullets[i].posz;
+            br=bullets[i].color[0], bg=bullets[i].color[1], bb=bullets[i].color[2];
+            glPushMatrix();
+            glTranslatef(x,y,z);
+            glColor3f(br,bg,bb);
+            glutSolidSphere(bullets[i].length, 20, 10);
+            glPopMatrix();
+        }
+    }
+}
+
+int rangeIntersect(float mina, float maxa, float minb, float maxb)
+{
+    /*mozda da proverim da l je proslednjeni min zaista manji od max?*/
+    return maxa>=minb && mina<=maxb;
+}
+/*proverava da li dva objekta imaju presek po svakoj osi,
+* ako imaju to je kolizija*/
+int hasCollision(Object a, Object b)
+{
+    float mina,maxa,minb,maxb;
+    mina=a.posx-a.length/2;
+    maxa=a.posx+a.length/2;
+    minb=b.posx-b.length/2;
+    maxb=b.posx+b.length/2;
+    int interx=rangeIntersect(mina, maxa, minb, maxb);
+
+    mina=a.posy-a.height/2;
+    maxa=a.posy+a.height/2;
+    minb=b.posy-b.height/2;
+    maxb=b.posy+b.height/2;
+    int intery=rangeIntersect(mina, maxa, minb, maxb);
+
+    mina=a.posz-a.width/2;
+    maxa=a.posz+a.width/2;
+    minb=b.posz-b.width/2;
+    maxb=b.posz+b.width/2;
+    int interz=rangeIntersect(mina, maxa, minb, maxb);
+
+
+    return interx && intery && interz;
+}
+void drawCube(Object o)
+{
+    glColor3f(o.color[0],o.color[1],o.color[2]);
     glPushMatrix();
-    glScalef(5,5,5);
-    glBegin(GL_QUADS);
-        glColor3f(0,0,0);
-        glVertex3f(1,-1,-1);
-        glColor3f(0,0,0);
-        glVertex3f(-1,-1,-1);
-        glColor3f(r,g,b);
-        glVertex3f(-1,-1,1);
-        glColor3f(r,g,b);
-        glVertex3f(1,-1,1);
-    glEnd();
+    glTranslatef(o.posx, o.posy, o.posz);
+    glutSolidCube(o.length);
     glPopMatrix();
-}*/
+}
+static Object cube={
+    .posx=0, .posy=0, .posz=0,
+    .vx={0,0}, .vy={0.0}, .vz={0,0},
+    .length=0.5, .height=0.5, .width=0.5,
+    .color={0,0,0}
+};
+
 void onDisplay(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -70,82 +172,19 @@ void onDisplay(void)
 
     glRotatef(rotWorld,0,1,0);
 
-    static float r=0.5,g=0.5,b=0.5;
+
     /*6 zidova sobe-strane kocke*/
-    //room(5);
-    glPushMatrix();
+    room(1);
 
-    glScalef(7,7,7);
-    glPushMatrix();
-    glTranslatef(0,-1,0);
-    glColor3f(r,g,b);
-    glutSolidCube(1);
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(0,1,0);
-    glColor3f(0,0,0.3);
-    glutSolidCube(1);
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(1,0,0);
-    glColor3f(0,0.4,0);
-    glutSolidCube(1);
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(-1,0,0);
-    glColor3f(0,0.4,0);
-    glutSolidCube(1);
-    glPopMatrix();
-
-    glPushMatrix();
-    glTranslatef(0,0,-1);
-    glColor3f(0.3,0,0);
-    glutSolidCube(1);
-    glPopMatrix();
-    /*glBegin(GL_QUADS);
-        glColor3f(0,0,0);
-        glVertex3f(1,-1,-1);
-        glColor3f(0,0,0);
-        glVertex3f(-1,-1,-1);
-        glColor3f(r,g,b);
-        glVertex3f(-1,-1,1);
-        glColor3f(r,g,b);
-        glVertex3f(1,-1,1);
-    glEnd();*/
-
-    glPopMatrix();
     drawAxis();
+    /*ova kolizija radi*/
+    drawCube(cube);
 
+    //printf("%d\n",hit);
     /*TEST iscrtavanje metka i pomeranje*/
-    float x=bullets[0].posx;
-    float y=bullets[0].posy;
-    float z=bullets[0].posz;
-    float vx=bullets[0].vx.curr;
-    float vy=bullets[0].vy.curr;
-    float vz=bullets[0].vz.curr;
 
-    float br=bullets[0].color[0];
-    float bg=bullets[0].color[1];
-    float bb=bullets[0].color[2];
-    if (bullets_active[0]){
-        glTranslatef(x,y,z);
-        glColor3f(br,bg,bb);
-        glutSolidSphere(0.2, 10, 10);
-        glTranslatef(-x,-y,-    z);
-    }
-    bullets[0].posx+=vx;
-    bullets[0].posy+=vy;
-    bullets[0].posz+=vz;
+    drawBullets();
 
-    if (bullets[0].posy<=-5){
-        bullets_active[0]=0;
-        r=br;
-        g=bg;
-        b=bb;
-    }
     /*TEST*/
 
     glTranslatef(-1.6, 0, -3);
@@ -157,6 +196,16 @@ void onDisplay(void)
     glutSwapBuffers();
 }
 
+void room(float size)
+{
+    glPushMatrix();
+    glScalef(size,size,size);
+    int i;
+    for (i=0;i<NUM_CUBES-1;i++){
+        drawCube(cubes[i]);
+    }
+    glPopMatrix();
+}
 
 const float FLOOR=-1;
 
@@ -170,7 +219,19 @@ void onTimerUpdate(int id)
     player.vy.curr=approach(player.vy.goal, player.vy.curr, dt/(float)500);
     player.posy+=player.vy.curr;
     /*kolizija*/
-
+    int i,j;
+    /*prodji kroz sve slotove, ako je aktivan metak proveri koliziju sa kockama*/
+    for (i=0; i<MAX_BULLETS; i++){
+        if (bullets_active[i]){
+            for (j=0; j<NUM_CUBES-1; j++){
+                if (hasCollision(cubes[j],bullets[i])){
+                    bullets_active[i]=0;
+                    setColor(&cubes[j],bullets[i].color[0],bullets[i].color[1],bullets[i].color[2]);
+                    break;
+                }
+            }
+        }
+    }
     /*kolizija sa podom*/
     player.posy-=0.02;//gravity
 
@@ -179,7 +240,7 @@ void onTimerUpdate(int id)
         player.posy=FLOOR+player.height/2;
         player.vy.curr=0;
     }
-
+    moveBullets();
     movePlayer();
     /*rotacija kamere*/
     updateCamAngle();

@@ -78,37 +78,48 @@ static float* moveForwardCam(void)
     return v;
 }
 
-#define MAX_BULLETS 30
+
 Object bullets[MAX_BULLETS];
 int bullets_active[MAX_BULLETS];
 
-
+#define BULLET_SPEED 10
 void firePaint()
 {
     int i=0;
     float r,g,b;
-    bullets_active[i]=1;
-    bullets[i]=bulletInit;
-    bullets[i].posx=player.posx;
-    bullets[i].posy=player.posy;
-    bullets[i].posz=player.posz;
-    switch(state.fireColor){
-        case(1):
-            r=1,g=1,b=1;
+    for (i=0;i<MAX_BULLETS;i++){
+        /*u prvi neaktivan slot ubaci*/
+        if (!bullets_active[i]){
+            bullets_active[i]=1;
+            bullets[i]=bulletInit;
+            bullets[i].posx=player.posx;
+            bullets[i].posy=player.posy;
+            bullets[i].posz=player.posz;
+            /*postavljanje boje metka na osnovu izabrane*/
+            switch(state.fireColor){
+                case(1):
+                    r=1,g=1,b=1;
+                    break;
+                case(2):
+                    r=0,g=0,b=1;
+                    break;
+                case(3):
+                    r=1,g=0.3,b=0.1;
+                    break;
+                default:
+                    r=1,g=1,b=1;
+                    break;
+            }
+            setColor(&bullets[i], r, g, b);
+            /*postavljanje vektora brzine metka na tacku gde igrac gleda*/
+            float * v=moveForwardCam();
+            bullets[i].vx.curr=v[0]/BULLET_SPEED;
+            bullets[i].vy.curr=v[1]/BULLET_SPEED;
+            bullets[i].vz.curr=v[2]/BULLET_SPEED;
+            /*izlazi iz petlje jer je postavljen metak*/
             break;
-        case(2):
-            r=0,g=0,b=1;
-            break;
-        case(3):
-            r=1,g=0.3,b=0.1;
-            break;
+        }
     }
-    setColor(&bullets[i], r, g, b);
-    float * v=moveForwardCam();
-    bullets[i].vx.curr=v[0]/50;
-    bullets[i].vy.curr=v[1]/50;
-    bullets[i].vz.curr=v[2]/50;
-
 }
 
 void resetBullets()
