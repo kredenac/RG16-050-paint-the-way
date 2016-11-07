@@ -1,5 +1,8 @@
 #ifndef MISCFUNC_H
 #define MISCFUNC_H
+#include <math.h>
+#include <stdio.h>
+#include <GL/glut.h>
 #include "player.h"
 #define TIMER_UPDATE_ID 1
 #define UPDATE_TIMER_INTVAL 17

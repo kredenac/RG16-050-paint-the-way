@@ -1,10 +1,9 @@
 #include "player.h"
-#include "miscfunc.h"
 
 const Object playerInit={
     .posx=0, .posy=1, .posz=2,
     .vx={0,0}, .vy={0.0}, .vz={0,0},
-    .length=0.5, .height=1.5, .width=0.5,
+    .length=0.4, .height=1.5, .width=0.4,
     .color={0,0,0}
 };
 const Object bulletInit={
@@ -13,7 +12,8 @@ const Object bulletInit={
     .length=0.1, .height=0.1, .width=0.1,
     .color={1,1,1}
 };
-State state={
+State state;
+const State stateInit={
     .jumping=0,
     .fireColor=1
 };
@@ -21,6 +21,7 @@ State state={
 Object player;
 extern int dt;
 
+float GRAVITY=0.03;
 float rotWorld;
 Val2f viewAzimuth;
 Val2f viewElevation;
@@ -34,6 +35,9 @@ static float* moveRightCam(void);
 static float* moveForwardCam(void);
 
 void movePlayer(){
+    player.posy-=GRAVITY;
+    player.vy.curr=approach(player.vy.goal, player.vy.curr, dt/(float)500);
+    player.posy+=player.vy.curr;
     float * r=moveRightCam();
     float * f=moveForwardCam();
     static float cameraVForward=0;
@@ -122,10 +126,39 @@ void firePaint()
     }
 }
 
+void moveBullets(void)
+{
+    int i;
+    for (i=0;i<MAX_BULLETS;i++)
+        if (bullets_active[i]){
+            bullets[i].posx+=bullets[i].vx.curr;
+            bullets[i].posy+=bullets[i].vy.curr;
+            bullets[i].posz+=bullets[i].vz.curr;
+    }
+}
+
 void resetBullets()
 {
     int i;
     for (i=0;i<MAX_BULLETS;i++){
         bullets_active[i]=0;
+    }
+}
+
+/*azuriranje parametra rotacije kamere*/
+void updateCamAngle(void)
+{
+    viewAzimuth.curr=approach(viewAzimuth.goal, viewAzimuth.curr, dt/(float)20);
+    //printf("curr:%f goal:%f\n",viewAzimuth.curr,viewAzimuth.goal);
+    if (viewAzimuth.curr>=360 && viewAzimuth.goal>=360){
+        viewAzimuth.curr-=360;
+        viewAzimuth.goal-=360;
+    }else if (viewAzimuth.curr<0 && viewAzimuth.goal<0){
+        viewAzimuth.curr+=360;
+        viewAzimuth.goal+=360;
+    }
+    viewElevation.curr=approach(viewElevation.goal, viewElevation.curr, dt/(float)20);
+    if (viewElevation.curr>MAX_ELEVATION){
+        viewElevation.curr=MAX_ELEVATION;
     }
 }

@@ -1,8 +1,5 @@
-#include <math.h>
-#include <stdio.h>
-#include <GL/glut.h>
+
 #include "miscfunc.h"
-#include "player.h"
 int animationOngoing=1;
 
 /*funkcija linearne interpolacije. sluzi da se postepeno menja vrednost*/
@@ -25,9 +22,11 @@ void setColor(Object* op, float r, float g, float b)
     op->color[2]=b;
 }
 
-extern void onTimerUpdate(int id);
+/*extern void onTimerUpdate(int id);*/
 void resetGame(void)
 {
+    resetBullets();
+    state=stateInit;
     player=playerInit;
     animationOngoing=1;
     rotWorld=0;
@@ -36,8 +35,8 @@ void resetGame(void)
     eyex=0, eyey=1, eyez=2;
     lookAtx=0, lookAty=0, lookAtz=0;
     upx=0, upy=1, upz=0;
-    glutTimerFunc(UPDATE_TIMER_INTVAL, onTimerUpdate,TIMER_UPDATE_ID);
-    player=playerInit;
+    /*jedino ako hocu da pauziram igru mi treba poziv timera.*/
+    /*glutTimerFunc(UPDATE_TIMER_INTVAL, onTimerUpdate,TIMER_UPDATE_ID);*/
 }
 
 void freezeGame(void)

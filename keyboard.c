@@ -1,12 +1,12 @@
-#include <GL/glut.h>
-#include "player.h"
 #include "keyboard.h"
-#include "miscfunc.h"
 
 static float viewAzimuthdt=30, viewElevationdt=20;
-float aspectRatio=1/*16/9.0*/;
+float aspectRatio=16/9.0;
 
-
+void mouseLook(int x, int y)
+{
+    printf("x: %d, y: %d\n",x,y);
+}
 void onSpecialInputUp(int key, int x, int y)
 {
     switch(key)
@@ -106,7 +106,7 @@ void onKeyboard(unsigned char key, int x, int y)
             player.vx.goal=0.05;
             break;
         case('r'):
-            player=playerInit;
+            resetGame();
             break;
         case ('m'):
             rotWorld+=10;

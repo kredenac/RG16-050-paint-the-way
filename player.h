@@ -1,6 +1,9 @@
 #ifndef PLAYER_H
 #define PLAYER_H
+#include <stdio.h>
+#include <math.h>
 
+#define MAX_ELEVATION 89
 #define MAX_BULLETS 77
 /*sluzi za cuvanje trenutnog i ciljnog stanja*/
 typedef struct{
@@ -28,15 +31,20 @@ typedef struct{
 }State;
 
 extern State state;
+extern const State stateInit;
 /*relativna pozicija visine glave u odnosu na centar tela
 * sluzi za pozicioniranje kamere*/
 extern float playerHeadHeight;
 extern const Object playerInit;
 extern void movePlayer();
 extern void firePaint();
-
+extern void resetBullets();
+extern void moveBullets(void);
+extern void updateCamAngle(void);
+extern void positionCam(void);
 extern Object player;
 
+extern float GRAVITY;
 extern float rotWorld;
 extern Val2f viewAzimuth;
 extern Val2f viewElevation;
@@ -53,4 +61,6 @@ extern float upx, upy, upz;
 
 extern Object bullets[];
 extern int bullets_active[];
+/*miscfunc.h includuje player.h i obrnuto pa se upletu ...*/
+#include "miscfunc.h"
 #endif
