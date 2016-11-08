@@ -78,7 +78,7 @@ Side aRelativeTob(Object a, Object b)
 }
 
 
-/*GLITCH: iako player nije skroz iznad objekta teleportuje se gore-dole.(napravi step size)
+/*GLITCH: iako player nije skroz iznad objekta teleportuje se gore-dole.(napravi max step size)
 * Kolizija nekad premesti igraca na pogresnu stranu.
 */
 void playerCollision(void)

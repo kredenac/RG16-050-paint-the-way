@@ -2,10 +2,25 @@
 
 static float viewAzimuthdt=30, viewElevationdt=20;
 float aspectRatio=16/9.0;
-
+/*mora jos da se podesava da lepo radi*/
 void mouseLook(int x, int y)
 {
     printf("x: %d, y: %d\n",x,y);
+    static float prev_mouse_X=0;
+    static float prev_mouse_Y=0;
+    float deltaX = x - prev_mouse_X;
+    float deltaY = y - prev_mouse_Y ;
+    if ( deltaX < -6.0f ) { deltaX = -6.0f; }
+    if ( deltaX >  6.0f ) { deltaX =  6.0f; }
+    if ( deltaY < -6.0f ) { deltaY = -6.0f; }
+    if ( deltaY >  6.0f ) { deltaY =  6.0f; }
+    prev_mouse_X=x;
+    prev_mouse_Y=y;
+    printf("deltax: %f, deltay: %f\n",deltaX,deltaY);
+    viewAzimuth.goal=viewAzimuth.curr+deltaX*viewAzimuthdt/100;
+    viewElevation.goal=viewElevation.curr-deltaY*viewElevationdt/100;
+    printf("acurr%f, agoal%f\n",viewAzimuth.curr,viewAzimuth.goal);
+
 }
 void onSpecialInputUp(int key, int x, int y)
 {
