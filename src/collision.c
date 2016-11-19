@@ -95,6 +95,19 @@ void playerCollision(void)
                 player.posy=p.posy + p.height/2 + player.height/2;
                 state.jumping=0;
                 player.vy.curr=0;
+                /*ako je na plavoj kocki pa odskace visoko*/
+                /*TODO funkcija koja prepoznaje boju, potom ovde CASE sta da se radi*/
+                if (p.color[0]==0 && p.color[1]==0 && p.color[2]==1){
+                    state.bigJump=1;
+
+                }else{
+                    state.bigJump=0;
+                }
+                if(p.color[0]==1 && p.color[1]==1 && p.color[2]==1){
+                    state.goFast=1;
+                }else{
+                    state.goFast=0;
+                }
             }else{
                 /*ako je kolizija sa strane spreci igraca da ulazi u objekat*/
                 side=aRelativeTob(player,p);

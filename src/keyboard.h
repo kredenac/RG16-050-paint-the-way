@@ -9,6 +9,9 @@ extern void onKeyboard(unsigned char key, int x, int y);
 extern void onKeyboardUp(unsigned char key, int x, int y);
 extern void onSpecialInput(int key, int x, int y);
 extern void onSpecialInputUp(int key, int x, int y);
-extern void mouseLook(int x, int y);
+extern void onMouseLook(int x, int y);
+extern void onMouseButton(int button, int state, int x, int y);
+extern void onMousePressedLook(int x, int y);
 extern float aspectRatio;
+extern float windowHeight;
 #endif

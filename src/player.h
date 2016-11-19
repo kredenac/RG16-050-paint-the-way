@@ -28,6 +28,8 @@ typedef struct{
 typedef struct{
     int jumping;
     int fireColor;
+    int bigJump;
+    int goFast;
 }State;
 
 extern State state;

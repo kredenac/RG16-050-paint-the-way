@@ -1,27 +1,67 @@
 #include "keyboard.h"
 
+float windowHeight=800,windowWidth;
 static float viewAzimuthdt=30, viewElevationdt=20;
 float aspectRatio=16/9.0;
-/*mora jos da se podesava da lepo radi*/
-void mouseLook(int x, int y)
+
+void onMouseButton(int button, int state, int x, int y)
 {
-    printf("x: %d, y: %d\n",x,y);
-    static float prev_mouse_X=0;
-    static float prev_mouse_Y=0;
+    if (button == GLUT_LEFT_BUTTON) {
+
+		if (state == GLUT_DOWN) {
+			firePaint();
+		}
+		else  {// state = GLUT_UP
+
+
+		}
+	}
+}
+static float prev_mouse_X=500;
+static float prev_mouse_Y=500;
+/*mora jos da se podesava da lepo radi*/
+void onMouseLook(int x, int y)
+{
     float deltaX = x - prev_mouse_X;
     float deltaY = y - prev_mouse_Y ;
-    if ( deltaX < -6.0f ) { deltaX = -6.0f; }
-    if ( deltaX >  6.0f ) { deltaX =  6.0f; }
-    if ( deltaY < -6.0f ) { deltaY = -6.0f; }
-    if ( deltaY >  6.0f ) { deltaY =  6.0f; }
     prev_mouse_X=x;
     prev_mouse_Y=y;
-    printf("deltax: %f, deltay: %f\n",deltaX,deltaY);
-    viewAzimuth.goal=viewAzimuth.curr+deltaX*viewAzimuthdt/100;
-    viewElevation.goal=viewElevation.curr-deltaY*viewElevationdt/100;
-    printf("acurr%f, agoal%f\n",viewAzimuth.curr,viewAzimuth.goal);
+    // printf("deltax: %f, deltay: %f\n",deltaX,deltaY);
+    viewAzimuth.curr+=deltaX*viewAzimuthdt/100;
+    viewElevation.curr-=deltaY*viewElevationdt/100;
+
+    if (viewElevation.curr>MAX_ELEVATION)
+        viewElevation.curr=MAX_ELEVATION;
+    if (viewElevation.curr<-MAX_ELEVATION)
+            viewElevation.curr=-MAX_ELEVATION;
+    viewAzimuth.goal=viewAzimuth.curr;
+    viewElevation.goal=viewElevation.curr;
+    //glutWarpPointer(windowWidth/2, windowHeight/2);
+    //Eh kad bi glutWarpPointer radio...
+    // printf("acurr%f, agoal%f\n",viewAzimuth.curr,viewAzimuth.goal);
 
 }
+/*isto kao i onMouseLook, sem sto se poziva umesto nje
+kada je pritisnuto dugme*/
+void onMousePressedLook(int x, int y)
+{
+    float deltaX = x - prev_mouse_X;
+    float deltaY = y - prev_mouse_Y ;
+
+    prev_mouse_X=x;
+    prev_mouse_Y=y;
+
+    viewAzimuth.curr+=deltaX*viewAzimuthdt/100;
+    viewElevation.curr-=deltaY*viewElevationdt/100;
+
+    if (viewElevation.curr>MAX_ELEVATION)
+        viewElevation.curr=MAX_ELEVATION;
+    if (viewElevation.curr<-MAX_ELEVATION)
+            viewElevation.curr=-MAX_ELEVATION;
+    viewAzimuth.goal=viewAzimuth.curr;
+    viewElevation.goal=viewElevation.curr;
+}
+
 void onSpecialInputUp(int key, int x, int y)
 {
     switch(key)
@@ -82,9 +122,7 @@ void onKeyboardUp(unsigned char key, int x, int y)
         case('s'):
             player.vz.goal=0;
             break;
-        case(' '):
-            player.vy.goal=0;
-            break;
+
     }
 }
 
@@ -94,10 +132,12 @@ void onKeyboard(unsigned char key, int x, int y)
     switch(key){
         case('f'):
             firePaint();
+            glutWarpPointer(windowWidth/2, windowHeight/2);
             break;
         case(' '):
             if (!state.jumping){
-                player.vy.goal=JUMP_V;
+                player.vy.goal=JUMP_V+state.bigJump*0.1;
+                state.bigJump=0;
                 state.jumping=1;
             }
             break;
@@ -112,7 +152,7 @@ void onKeyboard(unsigned char key, int x, int y)
             player.vz.goal=-0.05;
             break;
         case('w'):
-            player.vz.goal=0.05;
+            player.vz.goal=0.05+state.goFast*0.1;
             break;
         case('a'):
             player.vx.goal=-0.05;
@@ -121,6 +161,7 @@ void onKeyboard(unsigned char key, int x, int y)
             player.vx.goal=0.05;
             break;
         case('r'):
+            glutFullScreen();
             resetGame();
             break;
         case ('m'):
@@ -148,11 +189,14 @@ void onKeyboard(unsigned char key, int x, int y)
 
 void onReshape(int width, int height)
 {
+
     width=aspectRatio*height;
+    windowHeight=height;
+    windowWidth=width;
     glutReshapeWindow(width, height);
     glViewport(0, 0, width, height);
 
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(45.0, (float) width / height, 0.1, 100.0);
+    gluPerspective(60.0, (float) width / height, 0.1, 100.0);
 }

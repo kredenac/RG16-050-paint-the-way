@@ -16,6 +16,6 @@ typedef enum {
 extern int hasCollision(Object a, Object b);
 extern void playerCollision(void);
 extern void bulletCollision(void);
-#define NUM_CUBES 12
+#define NUM_CUBES 15
 extern Object cubes[];
 #endif

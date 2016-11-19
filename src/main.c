@@ -18,7 +18,7 @@ int main(int argc, char ** argv)
 {
     glutInit(&argc,argv);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
-    float windowHeight=800;
+
     glutInitWindowSize(aspectRatio*windowHeight,windowHeight);
     glutInitWindowPosition(100,100);
     glutCreateWindow("Paint the Way");
@@ -28,13 +28,21 @@ int main(int argc, char ** argv)
     glutKeyboardUpFunc(onKeyboardUp);
     glutSpecialFunc(onSpecialInput);
     glutSpecialUpFunc(onSpecialInputUp);
-    glutPassiveMotionFunc(mouseLook);
+    glutPassiveMotionFunc(onMouseLook);
+    glutMotionFunc(onMousePressedLook);
+    glutMouseFunc(onMouseButton);
 
+    glEnable(GL_CULL_FACE);
+    /*prilikom skaliranja se poremeti osvetljenje pa ovo popravi*/
+    glEnable(GL_NORMALIZE);
+    //glutSetCursor(GLUT_CURSOR_NONE);
 
     glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
 
+    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+    glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
     glClearColor(0, 0, 0, 0);
     initCubes();
     dt=glutGet(GLUT_ELAPSED_TIME);
@@ -57,7 +65,6 @@ void onDisplay(void)
     materialSetup();
 
     room(1);
-    drawAxis();
     drawBullets();
 
     glutSwapBuffers();

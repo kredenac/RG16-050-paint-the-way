@@ -15,13 +15,15 @@ const Object bulletInit={
 State state;
 const State stateInit={
     .jumping=0,
-    .fireColor=1
+    .fireColor=1,
+    .bigJump=0,
+    .goFast=0
 };
 
 Object player;
 extern int dt;
 
-float GRAVITY=0.03;
+float GRAVITY=-1;
 float rotWorld;
 Val2f viewAzimuth;
 Val2f viewElevation;
@@ -35,7 +37,7 @@ static float* moveRightCam(void);
 static float* moveForwardCam(void);
 
 void movePlayer(){
-    player.posy-=GRAVITY;
+    player.vy.goal=approach(GRAVITY, player.vy.goal, dt/(float)5000);
     player.vy.curr=approach(player.vy.goal, player.vy.curr, dt/(float)500);
     player.posy+=player.vy.curr;
     float * r=moveRightCam();

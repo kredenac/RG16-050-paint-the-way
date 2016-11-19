@@ -4,9 +4,9 @@ void lightSetup()
 {
     /* u pitanju je direkcionalno svetlo*/
     GLfloat light_position[] = { 3, 10, 10, 1 };
-    GLfloat light_direction[] = { -1, -1, -1};
-    GLfloat light_ambient[] = { 0.1, 0.1, 0.1, 1 };
-    GLfloat light_diffuse[] = { 0.7, 0.7, 0.6, 1 };
+    GLfloat light_direction[] = { -1, -1, 0};
+    GLfloat light_ambient[] = { 0.3, 0.3, 0.3, 1 };
+    GLfloat light_diffuse[] = { 0.8, 0.8, 0.8, 1 };
     GLfloat light_specular[] = { 0.9, 0.9, 0.9, 1 };
     /* Ukljucuje se osvjetljenje i podesavaju parametri svetla. */
     glEnable(GL_LIGHTING);
@@ -17,6 +17,7 @@ void lightSetup()
     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
     glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
     glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 90.0);
+
 }
 
 void materialSetup()
@@ -69,7 +70,7 @@ void positionCam(void)
 void room(float size)
 {
     glPushMatrix();
-    glScalef(size,size,size);
+    // glScalef(size,size,size);
     int i;
     for (i=0;i<NUM_CUBES;i++){
         drawCube(cubes[i]);
@@ -159,9 +160,25 @@ void initCubes()
         .color={0,0.2,0}
     };
     cubes[11]=(Object){
-        .posx=0, .posy=-6*val, .posz=val,
-        .length=10*val, .height=10*val, .width=10*val,
+        .posx=0, .posy=-2*val, .posz=val,
+        .length=10*val, .height=val, .width=10*val,
         .color={0.1,0,0.3}
+    };
+
+    cubes[12]=(Object){
+        .posx=0, .posy=0*val, .posz=4*val,
+        .length=6*val, .height=val, .width=val,
+        .color={0.1,0.4,0.3}
+    };
+    cubes[13]=(Object){
+        .posx=val, .posy=-val, .posz=3*val,
+        .length=val, .height=val, .width=val,
+        .color={0,0.2,0.3}
+    };
+    cubes[14]=(Object){
+        .posx=-val, .posy=-val, .posz=3*val,
+        .length=val, .height=val, .width=val,
+        .color={0.3,0.2,0}
     };
 }
 
@@ -187,6 +204,7 @@ void drawCube(Object o)
     drawWithColor(o);
     glPushMatrix();
     glTranslatef(o.posx, o.posy, o.posz);
-    glutSolidCube(o.length);
+    glScalef(o.length,o.height,o.width);
+    glutSolidCube(1);
     glPopMatrix();
 }
