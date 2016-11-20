@@ -15,7 +15,7 @@ const Object bulletInit={
 State state;
 const State stateInit={
     .jumping=0,
-    .fireColor=1,
+    .fireColor=0,
     .bigJump=0,
     .goFast=0
 };
@@ -37,23 +37,33 @@ static float* moveRightCam(void);
 static float* moveForwardCam(void);
 
 void movePlayer(){
-    player.vy.goal=approach(GRAVITY, player.vy.goal, dt/(float)5000);
-    player.vy.curr=approach(player.vy.goal, player.vy.curr, dt/(float)500);
-    player.posy+=player.vy.curr;
+    /*ako je neko dugme pritisnuto azuriraj brzine*/
+    onKeyHold();
+    if (!state.jumping)
+        GRAVITY=0;
+    else
+        GRAVITY=-1;
+
+    /*vektori napred i desno relativno od kamere*/
     float * r=moveRightCam();
     float * f=moveForwardCam();
-    static float cameraVForward=0;
-    static float cameraVSide=0;
-    cameraVForward=approach(player.vz.goal, cameraVForward, dt/(float)5000);
-    cameraVSide=approach(player.vx.goal, cameraVSide, dt/(float)5000);
+    /*brzine postepeno idu ka ciljnim*/
+    player.vz.curr=approach(player.vz.goal, player.vz.curr, dt/(float)5000);
+    player.vx.curr=approach(player.vx.goal, player.vx.curr, dt/(float)5000);
+    player.vy.curr=approach(player.vy.goal, player.vy.curr, dt/(float)500);
+    /*i ciljna brzina opada vremenom ako se ne doda sila na objekat*/
+    player.vz.goal=approach(0, player.vz.goal, dt/(float)50000);
+    player.vx.goal=approach(0, player.vx.goal, dt/(float)50000);
+    player.vy.goal=approach(GRAVITY, player.vy.goal, dt/(float)5000);
+    //printf("xcurr%f, xgoal%f, zcurr%f ,zgoal%f\n",player.vx.curr,player.vx.goal,player.vz.curr,player.vz.goal);
+    /*pomeraj levo-desno u odnosu na kameru*/
+    player.posx+=r[0]*player.vx.curr;
+    player.posz+=r[2]*player.vx.curr;
+    /*pomerak napred-nazad u odnosu na kameru*/
+    player.posz+=f[2]*player.vz.curr;
+    player.posx+=f[0]*player.vz.curr;
 
-    /*levo-desno u odnosu na kameru*/
-    player.posx+=r[0]*cameraVSide;
-    player.posz+=r[2]*cameraVSide;
-
-    /*napred-nazad*/
-    player.posz+=f[2]*cameraVForward;
-    player.posx+=f[0]*cameraVForward;
+    player.posy+=player.vy.curr;
 }
 
 /*pomeranje levo-desno u odnosu na kameru*/
@@ -102,20 +112,7 @@ void firePaint()
             bullets[i].posy=player.posy;
             bullets[i].posz=player.posz;
             /*postavljanje boje metka na osnovu izabrane*/
-            switch(state.fireColor){
-                case(1):
-                    r=1,g=1,b=1;
-                    break;
-                case(2):
-                    r=0,g=0,b=1;
-                    break;
-                case(3):
-                    r=1,g=0.3,b=0.1;
-                    break;
-                default:
-                    r=1,g=1,b=1;
-                    break;
-            }
+            set3fWithColor(state.fireColor,&r,&g,&b);
             setColor(&bullets[i], r, g, b);
             /*postavljanje vektora brzine metka na tacku gde igrac gleda*/
             float * v=moveForwardCam();

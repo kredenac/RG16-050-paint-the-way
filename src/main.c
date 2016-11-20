@@ -35,7 +35,8 @@ int main(int argc, char ** argv)
     glEnable(GL_CULL_FACE);
     /*prilikom skaliranja se poremeti osvetljenje pa ovo popravi*/
     glEnable(GL_NORMALIZE);
-    //glutSetCursor(GLUT_CURSOR_NONE);
+    glutSetCursor(GLUT_CURSOR_NONE);
+    glutIgnoreKeyRepeat(GL_TRUE);
 
     glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);

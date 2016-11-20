@@ -2,10 +2,18 @@
 #define PLAYER_H
 #include <stdio.h>
 #include <math.h>
+/*miscfunc.h includuje player.h i tako u krug pa moram ovde da stavim boje*/
+typedef enum {
+    WHITE,
+    BLUE,
+    ORANGE,
+    OTHER
+}Color;
+extern void onKeyHold();
 
 #define MAX_ELEVATION 89
 #define MAX_BULLETS 77
-/*sluzi za cuvanje trenutnog i ciljnog stanja*/
+/*sluzi za cuvanje trenutnog i ciljnog stanja, npr brzine*/
 typedef struct{
     float curr;
     float goal;
@@ -27,7 +35,7 @@ typedef struct{
 
 typedef struct{
     int jumping;
-    int fireColor;
+    Color fireColor;
     int bigJump;
     int goFast;
 }State;

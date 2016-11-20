@@ -5,6 +5,10 @@
 #include "player.h"
 #include "collision.h"
 
+
+extern GLfloat light_position2[];
+extern GLfloat light_direction2[];
+
 extern void drawAxis(void);
 extern void drawCube(Object o);
 extern void drawWithColor(Object o);

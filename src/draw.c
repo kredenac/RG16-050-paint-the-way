@@ -1,8 +1,9 @@
 #include "draw.h"
-
+GLfloat light_position2[] = { -30, 20, -100, -1 };
+GLfloat light_direction2[] = { 0, -1, 0};
 void lightSetup()
 {
-    /* u pitanju je direkcionalno svetlo*/
+    /* u pitanju je poziciono svetlo*/
     GLfloat light_position[] = { 3, 10, 10, 1 };
     GLfloat light_direction[] = { -1, -1, 0};
     GLfloat light_ambient[] = { 0.3, 0.3, 0.3, 1 };
@@ -10,7 +11,7 @@ void lightSetup()
     GLfloat light_specular[] = { 0.9, 0.9, 0.9, 1 };
     /* Ukljucuje se osvjetljenje i podesavaju parametri svetla. */
     glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
+    //glEnable(GL_LIGHT0);
     glLightfv(GL_LIGHT0, GL_POSITION, light_position);
     glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, light_direction);
     glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
@@ -18,12 +19,28 @@ void lightSetup()
     glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
     glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 90.0);
 
+
+
+
+    GLfloat light_ambient2[] = { 0.3, 0.3, 0.3, 0.2};
+    GLfloat light_diffuse2[] = { 0.4, 0.4, 0.4, 0.2 };
+    GLfloat light_specular2[] = { 0.2, 0.2, 0.2, 0.1 };
+
+    glEnable(GL_LIGHTING);
+    glEnable(GL_LIGHT2);
+    glLightfv(GL_LIGHT2, GL_POSITION, light_position2);
+    glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, light_direction2);
+    glLightfv(GL_LIGHT2, GL_AMBIENT, light_ambient2);
+    glLightfv(GL_LIGHT2, GL_DIFFUSE, light_diffuse2);
+    glLightfv(GL_LIGHT2, GL_SPECULAR, light_specular2);
+    glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 69.0);
+
 }
 
 void materialSetup()
 {
     /* Koeficijenti ambijentalne refleksije materijala. */
-    GLfloat ambient_coeffs[] = { 0.1, 0.1, 0.1, 1 };
+    GLfloat ambient_coeffs[] = { 0.2, 0.2, 0.2, 1 };
     /* Koeficijenti difuzne refleksije materijala. */
     GLfloat diffuse_coeffs[] = { 0.4, 0.4, 0.4, 1 };
     /* Koeficijenti spekularne refleksije materijala. */
@@ -40,7 +57,7 @@ void drawWithColor(Object o)
 {
     GLfloat diffuse_coeffs[] = { o.color[0],o.color[1],o.color[2], 1 };
     /*potamnjuje ambinet ceffs*/
-    float s=0.1;
+    float s=0.3;
     GLfloat ambient_coeffs[] = { o.color[0]*s,o.color[1]*s,o.color[2]*s, 1 };
     glMaterialfv(GL_FRONT, GL_AMBIENT, ambient_coeffs);
     glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_coeffs);
@@ -57,11 +74,15 @@ void positionCam(void)
     lookAtx=cos(M_PI*viewAzimuth.curr/180);
     lookAtz=sin(M_PI*viewAzimuth.curr/180);
     /*azuriranje lookat na osnovu gore-dole rotacije*/
-    lookAty=sin(M_PI*viewElevation.curr/180);
+    // lookAty=sin(M_PI*viewElevation.curr/180);
+    lookAty=2*sin(M_PI*viewElevation.curr/180);
     /*usmerava se pogled relativno od pozicije kamere*/
+    //printf("%f\n",sqrt(lookAty));
+    // printf("lookatx%f lookaty%f lookatz%f\n",lookAtx,lookAty,lookAtz);
     lookAtx=eyex+lookAtx;
     lookAtz=eyez+lookAtz;
     lookAty=eyey+lookAty;
+
     gluLookAt(eyex, eyey, eyez,
        lookAtx, lookAty, lookAtz,
        upx, upy, upz);
@@ -161,7 +182,7 @@ void initCubes()
     };
     cubes[11]=(Object){
         .posx=0, .posy=-2*val, .posz=val,
-        .length=10*val, .height=val, .width=10*val,
+        .length=20*val, .height=val, .width=50*val,
         .color={0.1,0,0.3}
     };
 
@@ -179,6 +200,41 @@ void initCubes()
         .posx=-val, .posy=-val, .posz=3*val,
         .length=val, .height=val, .width=val,
         .color={0.3,0.2,0}
+    };
+    cubes[15]=(Object){
+        .posx=0, .posy=-val, .posz=-3*val,
+        .length=10*val, .height=val, .width=5*val,
+        .color={0.3,0.5,0.9}
+    };
+    cubes[16]=(Object){
+        .posx=-2.5*val, .posy=-val, .posz=2*val,
+        .length=2*val, .height=val, .width=5*val,
+        .color={0.6,0.4,0.3}
+    };
+    cubes[17]=(Object){
+        .posx=2.5*val, .posy=-val, .posz=2*val,
+        .length=2*val, .height=val, .width=5*val,
+        .color={0.4,0.2,0.1}
+    };
+    cubes[18]=(Object){
+        .posx=0, .posy=1*val, .posz=-10*val,
+        .length=10*val, .height=0.5*val, .width=8*val,
+        .color={0.6,0.4,0.2}
+    };
+    cubes[19]=(Object){
+        .posx=-5.05*val, .posy=1*val, .posz=-12*val,
+        .length=0.1*val, .height=5*val, .width=15*val,
+        .color={0.6,0.1,0}
+    };
+    cubes[20]=(Object){
+        .posx=5.05*val, .posy=1*val, .posz=-12*val,
+        .length=0.1*val, .height=5*val, .width=15*val,
+        .color={0.4,0.5,0.1}
+    };
+    cubes[21]=(Object){
+        .posx=0*val, .posy=-0.25*val, .posz=-9*val,
+        .length=10*val, .height=2.5*val, .width=1*val,
+        .color={0.4,0.5,0.1}
     };
 }
 
