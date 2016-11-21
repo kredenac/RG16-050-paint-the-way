@@ -39,7 +39,11 @@ typedef struct{
     int bigJump;
     int goFast;
 }State;
+/*--------------------------*/
 
+//extern float testx, testz;
+
+/**---------------********/
 extern State state;
 extern const State stateInit;
 /*relativna pozicija visine glave u odnosu na centar tela

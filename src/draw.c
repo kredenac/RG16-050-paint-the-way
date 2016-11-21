@@ -180,9 +180,10 @@ void initCubes()
         .length=val, .height=val, .width=val,
         .color={0,0.2,0}
     };
+    /*velika dole*/
     cubes[11]=(Object){
         .posx=0, .posy=-2*val, .posz=val,
-        .length=20*val, .height=val, .width=50*val,
+        .length=20*val, .height=val, .width=32*val,
         .color={0.1,0,0.3}
     };
 
@@ -234,6 +235,18 @@ void initCubes()
     cubes[21]=(Object){
         .posx=0*val, .posy=-0.25*val, .posz=-9*val,
         .length=10*val, .height=2.5*val, .width=1*val,
+        .color={0.4,0.5,0.1}
+    };
+    /*landing*/
+    cubes[22]=(Object){
+        .posx=0*val, .posy=1*val, .posz=-20*val,
+        .length=4*val, .height=1*val, .width=5*val,
+        .color={0.4,0.5,0.1}
+    };
+    /*udubljenje ispod landing*/
+    cubes[23]=(Object){
+        .posx=0*val, .posy=-3*val, .posz=-20*val,
+        .length=10*val, .height=1*val, .width=10*val,
         .color={0.4,0.5,0.1}
     };
 }

@@ -41,7 +41,7 @@ int hasCollision(Object a, Object b)
     return interx && intery && interz;
 }
 
-static float kneeHeight=0.25;
+static float kneeHeight=0.35;
 int isAbove(Object a, Object b)
 {
     return a.posy - kneeHeight > b.posy + b.height/2;
@@ -58,6 +58,10 @@ Side aRelativeTob(Object a, Object b)
     float ax,az,leftx,rightx,frontz,backz;
     ax=a.posx;
     az=a.posz;
+    /*TEST --- SKLONI AKO SJEBES*/
+    ////////////////////////////////////
+    //ax=testx; az=testz;
+    /*--------------------------*/
     leftx=b.posx-b.length/2;
     rightx=b.posx+b.length/2;
     /*da li je blizi levoj ili desnoj strani*/
@@ -118,10 +122,12 @@ void playerCollision(void)
                         break;
                 }
             }else if(isBelow(player,p)){
-                /*TODO: ulepsaj*/
+                /*TODO: ulepsaj, mada ok je sad*/
                 player.posy-=0.05;
-                player.vy.curr=-player.vy.curr;
-                player.vy.goal=-player.vy.goal;
+                if (player.vy.curr>0){
+                    player.vy.curr=-player.vy.curr;
+                    player.vy.goal=-player.vy.goal;
+                }
             }else{
                 /*ako je kolizija sa strane spreci igraca da ulazi u objekat*/
                 side=aRelativeTob(player,p);

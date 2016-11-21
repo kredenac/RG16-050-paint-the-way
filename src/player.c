@@ -35,7 +35,7 @@ float JUMP_V=0.1;
 
 static float* moveRightCam(void);
 static float* moveForwardCam(void);
-
+float testx, testz;
 void movePlayer(){
     /*ako je neko dugme pritisnuto azuriraj brzine*/
     onKeyHold();
@@ -57,6 +57,8 @@ void movePlayer(){
     player.vy.goal=approach(GRAVITY, player.vy.goal, dt/(float)5000);
     //printf("xcurr%f, xgoal%f, zcurr%f ,zgoal%f\n",player.vx.curr,player.vx.goal,player.vz.curr,player.vz.goal);
     /*pomeraj levo-desno u odnosu na kameru*/
+    //testx=player.posx;
+    //testz=player.posz;
     player.posx+=r[0]*player.vx.curr;
     player.posz+=r[2]*player.vx.curr;
     /*pomerak napred-nazad u odnosu na kameru*/
