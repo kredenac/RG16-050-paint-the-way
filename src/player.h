@@ -39,11 +39,8 @@ typedef struct{
     int bigJump;
     int goFast;
 }State;
-/*--------------------------*/
 
-//extern float testx, testz;
 
-/**---------------********/
 extern State state;
 extern const State stateInit;
 /*relativna pozicija visine glave u odnosu na centar tela
@@ -58,6 +55,7 @@ extern void updateCamAngle(void);
 extern void positionCam(void);
 extern Object player;
 
+extern float lastPosx, lastPosz;
 extern float GRAVITY;
 extern float rotWorld;
 extern Val2f viewAzimuth;
@@ -66,7 +64,6 @@ extern float JUMP_V;
 extern Object player;
 extern int animationOngoing;
 
-extern float rotWorld;
 extern Val2f viewAzimuth;
 extern Val2f viewElevation;
 extern float eyex, eyey, eyez;

@@ -130,7 +130,6 @@ void onSpecialInputUp(int key, int x, int y)
 
 void onSpecialInput(int key, int x, int y)
 {
-
     switch(key)
     {
         case (GLUT_KEY_RIGHT):
@@ -200,29 +199,23 @@ void onKeyboard(unsigned char key, int x, int y)
             break;
         case('s'):
             KEY_S=1;
-            player.vz.goal=-0.05-state.goFast*0.1;
+            player.vz.goal=-0.05-state.goFast*0.15;
             break;
         case('w'):
             KEY_W=1;
-            player.vz.goal=0.05+state.goFast*0.1;
+            player.vz.goal=0.05+state.goFast*0.15;
             break;
         case('a'):
             KEY_A=1;
-            player.vx.goal=-0.05-state.goFast*0.1;
+            player.vx.goal=-0.05-state.goFast*0.15;
             break;
         case('d'):
             KEY_D=1;
-            player.vx.goal=0.05+state.goFast*0.1;
+            player.vx.goal=0.05+state.goFast*0.15;
             break;
         case('r'):
             glutFullScreen();
             resetGame();
-            break;
-        case ('m'):
-            rotWorld+=10;
-            break;
-        case ('n'):
-            rotWorld-=10;
             break;
         case ('1'):
             state.fireColor=WHITE;

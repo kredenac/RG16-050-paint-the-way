@@ -21,6 +21,7 @@ void setColor(Object* op, float r, float g, float b)
     op->color[1]=g;
     op->color[2]=b;
 }
+
 void set3fWithColor(Color c,float* r1, float* g1, float* b1)
 {
     float r,g,b;
@@ -40,6 +41,7 @@ void set3fWithColor(Color c,float* r1, float* g1, float* b1)
     }
     *r1=r, *g1=g, *b1=b;
 }
+
 Color getColor(Object o)
 {
     float col[3];
@@ -64,7 +66,7 @@ int isequal(float a, float b)
         return 1;
     return 0;
 }
-/*extern void onTimerUpdate(int id);*/
+
 void resetGame(void)
 {
     resetBullets();

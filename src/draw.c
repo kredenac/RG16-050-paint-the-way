@@ -1,6 +1,55 @@
 #include "draw.h"
 GLfloat light_position2[] = { -30, 20, -100, -1 };
 GLfloat light_direction2[] = { 0, -1, 0};
+
+/******************/
+static const float scale=2;
+Object* createBlock()
+{
+
+    Object* novi= (Object*)malloc(sizeof(Object));
+    if (novi==NULL)
+        return NULL;
+    novi->length=novi->height=novi->width=scale;
+    /*dodaj random boje*/
+
+    novi->color[0]=(float)rand()/(float)(RAND_MAX);
+    novi->color[1]=(float)rand()/(float)(RAND_MAX);
+    novi->color[2]=(float)rand()/(float)(RAND_MAX);
+    return novi;
+}
+
+int NUM_BLOCKS=0;
+Object* blocks[1000];
+/*za pocetak zamilsjam da su proslednjeni celi brojevi*/
+#define SWAP(x, y, T) do { T SWAP = x; x = y; y = SWAP; } while (0)
+void addBlocks(float begx, float endx, float begy, float endy, float begz, float endz)
+{
+    /*if (begx>endx || begy>endy || begz>endz){
+        printf("nisi dobro prosledio\n");
+        return;
+    }*/
+    if (begx>endx) SWAP(begx,endx,float);
+    if (begy>endy) SWAP(begy,endy,float);
+    if (begz>endz) SWAP(begz,endz,float);
+    int count=0;
+    begx*=2, endx*=2, begy*=2, endy*=2, begz*=2, endz*=2;//scale
+    float x,y,z;
+    for (x=begx; x<=endx; x+=scale){
+        for (y=begy; y<=endy; y+=scale){
+            for (z=begz; z<=endz; z+=scale){
+                blocks[NUM_BLOCKS]=createBlock();
+                blocks[NUM_BLOCKS]->posx=x;
+                blocks[NUM_BLOCKS]->posy=y;
+                blocks[NUM_BLOCKS]->posz=z;
+                NUM_BLOCKS++;
+                count++;
+            }
+        }
+    }
+    printf("novi blokovi:%d ukupno:%d\n",count,NUM_BLOCKS);
+}
+
 void lightSetup()
 {
     /* u pitanju je poziciono svetlo*/
@@ -88,43 +137,46 @@ void positionCam(void)
        upx, upy, upz);
 }
 
-void room(float size)
+void map()
 {
-    glPushMatrix();
-    // glScalef(size,size,size);
     int i;
     for (i=0;i<NUM_CUBES;i++){
         drawCube(cubes[i]);
     }
-    glPopMatrix();
-}
-
-
-void drawAxis(void)
-{
-    glBegin(GL_LINES);
-        glColor3f(1,1,1);
-        glVertex3f(-1,0,0);
-        glColor3f(1,0,0);
-        glVertex3f(1,0,0);
-    glEnd();
-    glBegin(GL_LINES);
-        glColor3f(1,1,1);
-        glVertex3f(0,-1,0);
-        glColor3f(0,1,0);
-        glVertex3f(0,1,0);
-    glEnd();
-    glBegin(GL_LINES);
-        glColor3f(1,1,1);
-        glVertex3f(0,0,-1);
-        glColor3f(0,0,1);
-        glVertex3f(0,0,1);
-    glEnd();
+    for (i=0;i<NUM_BLOCKS;i++){
+        drawCube(*blocks[i]);
+    }
 }
 
 void initCubes()
 {
     float val=2;
+    /*zid iza*/
+    addBlocks(-4,4,0,2,6,6);
+    /*2 rupe ispod*/
+    addBlocks(-1,1,-2,-2,2,2);
+    /*iza starta ploce*/
+    addBlocks(-4,4,-1,-1,3,5);
+    /*sa leve i desne strane starta*/
+    addBlocks(-4,-2,-1,-1,0,2);
+    addBlocks(4,2,-1,-1,0,2);
+    //addBlocks(-4,4,1,1,-6,-14);
+    /*platforma koja se boji u plavo*/
+    addBlocks(-4,4,-1,-1,-1,-5);
+    /*zidovi oko platforme koja se boji u narandzasto*/
+    addBlocks(-5,-5,-1,3,-6,-17);
+    addBlocks(5,5,-1,3,-6,-17);
+    /*narandzasta platforma*/
+    addBlocks(-4,4,1,1,-6,-13);
+    /*help da se vratim*/
+    addBlocks(-4,4,-1,0,-14,-14);
+    /*landing nakon sprinta*/
+    addBlocks(-2,2,1,1,-23,-18);
+    /*da se vratim kad padnem sa sprinta*/
+    addBlocks(-4,4,-2,-2,-15,-17);
+
+
+
     cubes[0]=(Object){
         .posx=-val, .posy=0, .posz=0,
         .length=val, .height=val, .width=val,
@@ -175,81 +227,17 @@ void initCubes()
         .length=val, .height=val, .width=val,
         .color={0,0.2,0}
     };
-    cubes[10]=(Object){
-        .posx=0, .posy=-val, .posz=3*val,
-        .length=val, .height=val, .width=val,
-        .color={0,0.2,0}
-    };
     /*velika dole*/
-    cubes[11]=(Object){
-        .posx=0, .posy=-2*val, .posz=val,
+    cubes[10]=(Object){
+        .posx=0, .posy=-2.5*val, .posz=val,
         .length=20*val, .height=val, .width=32*val,
         .color={0.1,0,0.3}
     };
 
-    cubes[12]=(Object){
-        .posx=0, .posy=0*val, .posz=4*val,
-        .length=6*val, .height=val, .width=val,
-        .color={0.1,0.4,0.3}
-    };
-    cubes[13]=(Object){
-        .posx=val, .posy=-val, .posz=3*val,
-        .length=val, .height=val, .width=val,
-        .color={0,0.2,0.3}
-    };
-    cubes[14]=(Object){
-        .posx=-val, .posy=-val, .posz=3*val,
-        .length=val, .height=val, .width=val,
-        .color={0.3,0.2,0}
-    };
-    cubes[15]=(Object){
-        .posx=0, .posy=-val, .posz=-3*val,
-        .length=10*val, .height=val, .width=5*val,
-        .color={0.3,0.5,0.9}
-    };
-    cubes[16]=(Object){
-        .posx=-2.5*val, .posy=-val, .posz=2*val,
-        .length=2*val, .height=val, .width=5*val,
-        .color={0.6,0.4,0.3}
-    };
-    cubes[17]=(Object){
-        .posx=2.5*val, .posy=-val, .posz=2*val,
-        .length=2*val, .height=val, .width=5*val,
-        .color={0.4,0.2,0.1}
-    };
-    cubes[18]=(Object){
-        .posx=0, .posy=1*val, .posz=-10*val,
-        .length=10*val, .height=0.5*val, .width=8*val,
-        .color={0.6,0.4,0.2}
-    };
-    cubes[19]=(Object){
-        .posx=-5.05*val, .posy=1*val, .posz=-12*val,
-        .length=0.1*val, .height=5*val, .width=15*val,
-        .color={0.6,0.1,0}
-    };
-    cubes[20]=(Object){
-        .posx=5.05*val, .posy=1*val, .posz=-12*val,
-        .length=0.1*val, .height=5*val, .width=15*val,
-        .color={0.4,0.5,0.1}
-    };
-    cubes[21]=(Object){
-        .posx=0*val, .posy=-0.25*val, .posz=-9*val,
-        .length=10*val, .height=2.5*val, .width=1*val,
-        .color={0.4,0.5,0.1}
-    };
-    /*landing*/
-    cubes[22]=(Object){
-        .posx=0*val, .posy=1*val, .posz=-20*val,
-        .length=4*val, .height=1*val, .width=5*val,
-        .color={0.4,0.5,0.1}
-    };
-    /*udubljenje ispod landing*/
-    cubes[23]=(Object){
-        .posx=0*val, .posy=-3*val, .posz=-20*val,
-        .length=10*val, .height=1*val, .width=10*val,
-        .color={0.4,0.5,0.1}
-    };
+
 }
+
+
 
 
 void drawBullets(void)

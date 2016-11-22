@@ -3,7 +3,7 @@
 const Object playerInit={
     .posx=0, .posy=1, .posz=2,
     .vx={0,0}, .vy={0.0}, .vz={0,0},
-    .length=0.4, .height=1.5, .width=0.4,
+    .length=0.4, .height=1.4, .width=0.4,
     .color={0,0,0}
 };
 const Object bulletInit={
@@ -30,12 +30,12 @@ Val2f viewElevation;
 float eyex, eyey, eyez;
 float lookAtx, lookAty, lookAtz;
 float upx, upy, upz;
-float playerHeadHeight=0.2;
+float playerHeadHeight=0.25;
 float JUMP_V=0.1;
 
 static float* moveRightCam(void);
 static float* moveForwardCam(void);
-float testx, testz;
+float lastPosx, lastPosz;
 void movePlayer(){
     /*ako je neko dugme pritisnuto azuriraj brzine*/
     onKeyHold();
@@ -43,7 +43,6 @@ void movePlayer(){
         GRAVITY=0;
     else
         GRAVITY=-1;
-
     /*vektori napred i desno relativno od kamere*/
     float * r=moveRightCam();
     float * f=moveForwardCam();
@@ -56,12 +55,12 @@ void movePlayer(){
     player.vx.goal=approach(0, player.vx.goal, dt/(float)50000);
     player.vy.goal=approach(GRAVITY, player.vy.goal, dt/(float)5000);
     //printf("xcurr%f, xgoal%f, zcurr%f ,zgoal%f\n",player.vx.curr,player.vx.goal,player.vz.curr,player.vz.goal);
+    lastPosx=player.posx;
+    lastPosz=player.posz;
     /*pomeraj levo-desno u odnosu na kameru*/
-    //testx=player.posx;
-    //testz=player.posz;
     player.posx+=r[0]*player.vx.curr;
     player.posz+=r[2]*player.vx.curr;
-    /*pomerak napred-nazad u odnosu na kameru*/
+    /*pomeraj napred-nazad u odnosu na kameru*/
     player.posz+=f[2]*player.vz.curr;
     player.posx+=f[0]*player.vz.curr;
 
@@ -117,7 +116,7 @@ void firePaint()
             set3fWithColor(state.fireColor,&r,&g,&b);
             setColor(&bullets[i], r, g, b);
             /*postavljanje vektora brzine metka na tacku gde igrac gleda*/
-            float * v=moveForwardCam();
+            float* v=moveForwardCam();
             bullets[i].vx.curr=v[0]/BULLET_SPEED;
             bullets[i].vy.curr=v[1]/BULLET_SPEED;
             bullets[i].vz.curr=v[2]/BULLET_SPEED;
@@ -126,7 +125,9 @@ void firePaint()
         }
     }
 }
-
+/*bullets[i].vx.goal koristim kao brojac duzine zivota metaka
+nakon max_bullet_life nestane.*/
+static const float MAX_BULLET_LIFE=1000;
 void moveBullets(void)
 {
     int i;
@@ -135,6 +136,9 @@ void moveBullets(void)
             bullets[i].posx+=bullets[i].vx.curr;
             bullets[i].posy+=bullets[i].vy.curr;
             bullets[i].posz+=bullets[i].vz.curr;
+            bullets[i].vx.goal++;
+            if (bullets[i].vx.goal>MAX_BULLET_LIFE)
+                bullets_active[i]=0;
     }
 }
 

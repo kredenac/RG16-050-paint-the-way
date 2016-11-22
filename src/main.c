@@ -20,7 +20,7 @@ int main(int argc, char ** argv)
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 
     glutInitWindowSize(aspectRatio*windowHeight,windowHeight);
-    glutInitWindowPosition(100,100);
+    glutInitWindowPosition(0,0);
     glutCreateWindow("Paint the Way");
     glutDisplayFunc(onDisplay);
     glutReshapeFunc(onReshape);
@@ -33,7 +33,7 @@ int main(int argc, char ** argv)
     glutMouseFunc(onMouseButton);
 
     glEnable(GL_CULL_FACE);
-    /*prilikom skaliranja se poremeti osvetljenje pa ovo popravi*/
+    /*prilikom skaliranja se poremeti osvetljenje pa me gl_normalize spasi*/
     glEnable(GL_NORMALIZE);
     glutSetCursor(GLUT_CURSOR_NONE);
     glutIgnoreKeyRepeat(GL_TRUE);
@@ -45,10 +45,9 @@ int main(int argc, char ** argv)
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
     glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
     glClearColor(0, 0, 0, 0);
-    initCubes();
+    resetGame();
     dt=glutGet(GLUT_ELAPSED_TIME);
     srand(time(NULL));
-    resetGame();
     glutTimerFunc(UPDATE_TIMER_INTVAL, onTimerUpdate,TIMER_UPDATE_ID);
     glutMainLoop();
     return 0;
@@ -60,12 +59,11 @@ void onDisplay(void)
     positionCam();
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
-    glRotatef(rotWorld,0,1,0);
 
     lightSetup();
     materialSetup();
 
-    room(1);
+    map();
     drawBullets();
 
     glutSwapBuffers();
@@ -99,6 +97,7 @@ void updatedt(void)
     static int oldTime=0;
     dt=newTime-oldTime;
     oldTime=newTime;
+    //printf("%f\n",1000/(float)dt);
     if (dt>DT_MAX)
         dt=DT_MAX;
 }

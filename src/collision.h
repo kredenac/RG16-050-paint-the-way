@@ -4,6 +4,7 @@
 #include <math.h>
 #include "player.h"
 #include "miscfunc.h"
+#include "draw.h"//
 
 typedef enum {
     TOP,
@@ -16,6 +17,6 @@ typedef enum {
 extern int hasCollision(Object a, Object b);
 extern void playerCollision(void);
 extern void bulletCollision(void);
-#define NUM_CUBES 24
+#define NUM_CUBES 11
 extern Object cubes[];
 #endif
