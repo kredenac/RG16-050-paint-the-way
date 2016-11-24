@@ -226,6 +226,9 @@ void onKeyboard(unsigned char key, int x, int y)
         case ('3'):
             state.fireColor=ORANGE;
             break;
+        case ('4'):
+            printf("%f, %f, %f\n",player.posx,player.posy,player.posz);
+            break;
         case('p'):
             if (!releaseMouse){
                 glutSetCursor(GLUT_CURSOR_LEFT_ARROW);

@@ -12,7 +12,7 @@ typedef enum {
 extern void onKeyHold();
 
 #define MAX_ELEVATION 89
-#define MAX_BULLETS 77
+#define MAX_BULLETS 100
 /*sluzi za cuvanje trenutnog i ciljnog stanja, npr brzine*/
 typedef struct{
     float curr;
@@ -38,6 +38,7 @@ typedef struct{
     Color fireColor;
     int bigJump;
     int goFast;
+    int finishedGame;
 }State;
 
 

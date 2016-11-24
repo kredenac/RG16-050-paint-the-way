@@ -74,12 +74,12 @@ void resetGame(void)
     state=stateInit;
     player=playerInit;
     animationOngoing=1;
-    rotWorld=0;
     viewAzimuth.curr=270, viewAzimuth.goal=270;
     viewElevation.curr=-10, viewElevation.goal=-10;
     eyex=0, eyey=1, eyez=2;
     lookAtx=0, lookAty=0, lookAtz=0;
     upx=0, upy=1, upz=0;
+    paintedLightIsOn=0;
     /*jedino ako hocu da pauziram igru mi treba poziv timera.*/
     /*glutTimerFunc(UPDATE_TIMER_INTVAL, onTimerUpdate,TIMER_UPDATE_ID);*/
 }

@@ -17,11 +17,13 @@ const State stateInit={
     .jumping=0,
     .fireColor=0,
     .bigJump=0,
-    .goFast=0
+    .goFast=0,
+    .finishedGame=0
 };
 
 Object player;
 extern int dt;
+
 
 float GRAVITY=-1;
 float rotWorld;
@@ -65,6 +67,9 @@ void movePlayer(){
     player.posx+=f[0]*player.vz.curr;
 
     player.posy+=player.vy.curr;
+    if (player.posy>=11.7 && player.posy<=12 && player.posx>-0.8 && player.posx<0.8 && player.posz<=-17.2 && player.posz>=-18.8){
+        state.finishedGame=1;
+    }
 }
 
 /*pomeranje levo-desno u odnosu na kameru*/

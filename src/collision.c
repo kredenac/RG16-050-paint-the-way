@@ -7,7 +7,7 @@ Side aRelativeTob(Object a, Object b);
 void playerCollision(void);
 void bulletCollision(void);
 
-Object cubes[NUM_CUBES];
+
 
 int rangeIntersect(float mina, float maxa, float minb, float maxb)
 {
@@ -81,7 +81,9 @@ Side aRelativeTob(Object a, Object b)
     //printf("%s a.x=%f a.z=%f\n ",(ax<az) ? "Blizi x" : "Blizi z",testx,testz);
     return (ax<az) ? x : z;
 }
-
+/*eps sluzi kao mala velicina za koju odaljim igraca od blokova
+da ne bi bila kolizija */
+static const float eps=0.0001;
 void playerCollision(void)
 {
     /*postavlja se jumping na 1, pa ako stoji na necemu bice 0*/
@@ -89,63 +91,6 @@ void playerCollision(void)
     int i;
     Side side;
     Object p;
-    for (i=0;i<NUM_CUBES;i++){
-        p=cubes[i];
-        if (hasCollision(player,p)){
-                /*kolizija sa podom*/
-            if (isAbove(player,p)){
-                player.posy=p.posy + p.height/2 + player.height/2;
-                state.jumping=0;
-                player.vy.curr=0;
-
-                Color c=getColor(p);
-                switch(c){
-                    case(BLUE):
-                        state.bigJump=1;
-                        state.goFast=0;
-                        break;
-                    case(ORANGE):
-                        state.goFast=1;
-                        state.bigJump=0;
-                        break;
-                    case(WHITE):
-                    case(OTHER):
-                        state.bigJump=0;
-                        state.goFast=0;
-                        break;
-                }
-                /*kolizija sa plafonom*/
-            }else if(isBelow(player,p)){
-                /*TODO: ulepsaj, mada ok je sad*/
-                player.posy-=0.05;
-                if (player.vy.curr>0){
-                    player.vy.curr=-player.vy.curr/2;
-                    player.vy.goal=-player.vy.goal/2;
-                }
-            }else{
-                /*ako je kolizija sa strane spreci igraca da ulazi u objekat*/
-
-                side=aRelativeTob(player,p);
-                switch(side){
-                    case FRONT:
-                        player.posz=p.posz+p.width/2+player.width/2;
-                        break;
-                    case BACK:
-                        player.posz=p.posz-p.width/2-player.width/2;
-                        break;
-                    case LEFT:
-                        player.posx=p.posx-p.length/2-player.length/2;
-                        break;
-                    case RIGHT:
-                        player.posx=p.posx+p.length/2+player.length/2;
-                        break;
-                    default:
-                        break;
-                }
-            }
-        }
-    }
-    /********************Privremeno, posle treba da izbrisem gornji blok*************************/
     for (i=0;i<NUM_BLOCKS;i++){
         p=*blocks[i];
         if (hasCollision(player,p)){
@@ -185,16 +130,16 @@ void playerCollision(void)
                 side=aRelativeTob(player,p);
                 switch(side){
                     case FRONT:
-                        player.posz=p.posz+p.width/2+player.width/2;
+                        player.posz=p.posz+p.width/2+player.width/2+eps;
                         break;
                     case BACK:
-                        player.posz=p.posz-p.width/2-player.width/2;
+                        player.posz=p.posz-p.width/2-player.width/2-eps;
                         break;
                     case LEFT:
-                        player.posx=p.posx-p.length/2-player.length/2;
+                        player.posx=p.posx-p.length/2-player.length/2-eps;
                         break;
                     case RIGHT:
-                        player.posx=p.posx+p.length/2+player.length/2;
+                        player.posx=p.posx+p.length/2+player.length/2+eps;
                         break;
                     default:
                         break;
@@ -210,30 +155,12 @@ void bulletCollision(void)
     int i,j;
     for (i=0; i<MAX_BULLETS; i++){
         if (bullets_active[i]){
-            for (j=0; j<NUM_CUBES; j++){
-                if (hasCollision(cubes[j],bullets[i])){
-                    bullets_active[i]=0;
-                    setColor(&cubes[j],bullets[i].color[0],bullets[i].color[1],bullets[i].color[2]);
-                    /*ako ima kolizije sa kockom ne proveravaj ostale*/
-                    if (getColor(bullets[i])==WHITE){
-                        light_position2[0] =bullets[i].posx;
-                        light_position2[1] =bullets[i].posy;
-                        light_position2[2] =bullets[i].posz;
-                        light_position2[3] =1;
-                        light_direction2[0]=-bullets[i].vx.curr;
-                        light_direction2[1]=-bullets[i].vy.curr;
-                        light_direction2[2]=-bullets[i].vz.curr;
-                    }
-                    break;
-                }
-            }
-            /***Privremeno, posle treba da izbrisem gornji blok**/
             for (j=0; j<NUM_BLOCKS; j++){
                 if (hasCollision(*blocks[j],bullets[i])){
                     bullets_active[i]=0;
-                    setColor(blocks[j],bullets[i].color[0],bullets[i].color[1],bullets[i].color[2]);                    
-                    /*ako ima kolizije sa kockom ne proveravaj ostale*/
                     if (getColor(bullets[i])==WHITE){
+                        psychedelic(1);
+                        paintedLightIsOn=1;
                         light_position2[0] =bullets[i].posx;
                         light_position2[1] =bullets[i].posy;
                         light_position2[2] =bullets[i].posz;
@@ -242,6 +169,8 @@ void bulletCollision(void)
                         light_direction2[1]=-bullets[i].vy.curr;
                         light_direction2[2]=-bullets[i].vz.curr;
                     }
+                    /*ako ima kolizije sa kockom ne proveravaj ostale*/
+                    setColor(blocks[j],bullets[i].color[0],bullets[i].color[1],bullets[i].color[2]);
                     break;
                 }
             }

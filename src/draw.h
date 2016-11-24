@@ -8,7 +8,7 @@
 
 extern int NUM_BLOCKS;
 extern Object* blocks[];
-
+extern int paintedLightIsOn;
 extern GLfloat light_position2[];
 extern GLfloat light_direction2[];
 
@@ -20,4 +20,5 @@ extern void map();
 extern void initCubes();
 extern void lightSetup();
 extern void materialSetup();
+extern void psychedelic();
 #endif
