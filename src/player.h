@@ -9,7 +9,7 @@ typedef enum {
     ORANGE,
     OTHER
 }Color;
-extern void onKeyHold();
+
 
 #define MAX_ELEVATION 89
 #define MAX_BULLETS 100
@@ -48,12 +48,12 @@ extern const State stateInit;
 * sluzi za pozicioniranje kamere*/
 extern float playerHeadHeight;
 extern const Object playerInit;
-extern void movePlayer();
-extern void firePaint();
-extern void resetBullets();
+extern void movePlayer(void);
+extern void firePaint(void);
+extern void resetBullets(void);
 extern void moveBullets(void);
-extern void updateCamAngle(void);
 extern void positionCam(void);
+extern void onKeyHold(void);
 extern Object player;
 
 extern float lastPosx, lastPosz;

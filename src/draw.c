@@ -115,14 +115,13 @@ void positionCam(void)
     eyey=player.posy+playerHeadHeight;
     eyez=player.posz;
 
-    /*azuriranje lookat na osnovu levo-desno rotacije*/
-    lookAtx=cos(M_PI*viewAzimuth.curr/180);
-    lookAtz=sin(M_PI*viewAzimuth.curr/180);
+    /*azuriranje lookat na osnovu levo-desno rotacije. A3*/
+    float cosy=cos(M_PI*viewElevation.curr/180);
+    lookAtx=cos(M_PI*viewAzimuth.curr/180)*cosy;
+    lookAtz=sin(M_PI*viewAzimuth.curr/180)*cosy;
     /*azuriranje lookat na osnovu gore-dole rotacije*/
-    // lookAty=sin(M_PI*viewElevation.curr/180);
-    lookAty=2*sin(M_PI*viewElevation.curr/180);
+    lookAty=sin(M_PI*viewElevation.curr/180);
     /*usmerava se pogled relativno od pozicije kamere*/
-    //printf("%f\n",sqrt(lookAty));
     // printf("lookatx%f lookaty%f lookatz%f\n",lookAtx,lookAty,lookAtz);
     lookAtx=eyex+lookAtx;
     lookAtz=eyez+lookAtz;
@@ -135,9 +134,9 @@ void positionCam(void)
 
 void map()
 {
-    //if (state.finishedGame){
-    //    psychedelic(60);
-    //}
+    if (state.finishedGame){
+        psychedelic(60);
+    }
     int i;
     for (i=0;i<NUM_BLOCKS;i++){
         drawCube(*blocks[i]);
@@ -153,7 +152,8 @@ void psychedelic(int interval)
     c=0;
     int i;
     for(i=0; i<NUM_BLOCKS; i++){
-        setColor(blocks[i], (float)rand()/(float)(RAND_MAX), (float)rand()/(float)(RAND_MAX), (float)rand()/(float)(RAND_MAX));
+        setColor(blocks[i], (float)rand()/(float)(RAND_MAX),
+            (float)rand()/(float)(RAND_MAX), (float)rand()/(float)(RAND_MAX));
     }
 }
 void initCubes()
@@ -168,11 +168,11 @@ void initCubes()
 
     /*veliki levi i desni zidovi*/
     sizex=2,sizey=4,sizez=4;
-    addBlocks(-5,-5,0.5,3,5,-25);
-    addBlocks(5,5,0.5,3,5,-25);
+    addBlocks(-5,-5,0.5,6,5,-25);
+    addBlocks(5,5,0.5,6,5,-25);
     /*zid iza*/
     sizex=4,sizey=4,sizez=4;
-    addBlocks(-4,4,0.5,3,6.5,6.5);
+    addBlocks(-4,4,0.5,6,6.5,6.5);
     sizex=sizey=sizez=2;
     /*2 rupe ispod*/
     addBlocks(-1,1,-2,-2,2,2);
@@ -209,7 +209,7 @@ void initCubes()
     addBlocks(-4,4,2,2,-22,-25);
     /*zid iza */
     sizex=4,sizey=4,sizez=2;
-    addBlocks(-4,4,2,4,-26,-26);
+    addBlocks(-4,4,0.5,6,-26,-26);
     sizex=sizey=sizez=2;
     /*landing na poslednju plat*/
     addBlocks(-1,1,4.0625,4.125,-14,-14);
@@ -224,7 +224,6 @@ void initCubes()
     addBlocks(-3,3,5,5,-7,-11);
     /*border*/
     addBlocks(-1,1,6,6,-10,-10);
-    addBlocks(-1,1,6,6,-8,-8);
     addBlocks(-1,-1,6,6,-9,-9);
     addBlocks(1,1,6,6,-9,-9);
 
@@ -292,9 +291,6 @@ void initCubes()
     }
 
 }
-
-
-
 
 void drawBullets(void)
 {

@@ -49,7 +49,8 @@ int isAbove(Object a, Object b)
 
 int isBelow(Object a, Object b)
 {
-    return a.posy  < b.posy - b.height/2;
+    //return a.posy  < b.posy - b.height/2;
+    return a.posy - playerHeadHeight + player.height/2 < b.posy - b.height/2;
 }
 
 /*kada ima kolizije da se odluci sa koje strane b je*/
@@ -119,14 +120,13 @@ void playerCollision(void)
                 /*kolizija sa plafonom*/
             }else if(isBelow(player,p)){
                 /*TODO: ulepsaj, mada ok je sad*/
-                player.posy-=0.05;
+                player.posy-=eps;
                 if (player.vy.curr>0){
                     player.vy.curr=-player.vy.curr/2;
                     player.vy.goal=-player.vy.goal/2;
                 }
             }else{
                 /*ako je kolizija sa strane spreci igraca da ulazi u objekat*/
-
                 side=aRelativeTob(player,p);
                 switch(side){
                     case FRONT:
@@ -169,8 +169,8 @@ void bulletCollision(void)
                         light_direction2[1]=-bullets[i].vy.curr;
                         light_direction2[2]=-bullets[i].vz.curr;
                     }
-                    /*ako ima kolizije sa kockom ne proveravaj ostale*/
                     setColor(blocks[j],bullets[i].color[0],bullets[i].color[1],bullets[i].color[2]);
+                    /*ako ima kolizije sa kockom ne proveravaj ostale*/
                     break;
                 }
             }

@@ -25,17 +25,14 @@ static float prev_mouse_X=500;
 static float prev_mouse_Y=500;
 /*nakon poziva funkcije glutWarpPointer se postavi kursor u centar.
 Zbog toga glutmainloop opet pozove onMouseLook i tako u krug.
-Da bi se izignorisalo dejstvo tog poziva promenljiva warped se ukljuci nakon
-poziva glutWarpPointer i postavi na nulu pri sledecem ulasku u onMouseLook*/
-static int warped=0;
+Da bi se izignorisalo dejstvo tog poziva prekida se izvrsavanje funkcije
+ako je kursor u centru*/
 /*indikator da li prozor igre ne dopusta kursoru misa da ga napusti. overly attached*/
 static int releaseMouse=0;
 void onMouseLook(int x, int y)
 {
-    if (warped){
-        warped=0;
+    if (x == windowWidth/2 && y == windowHeight/2)
         return;
-    }
     float deltaX;
     float deltaY;
     if (releaseMouse){
@@ -45,30 +42,31 @@ void onMouseLook(int x, int y)
         deltaX = x - windowWidth/2;
         deltaY = y - windowHeight/2;
         glutWarpPointer(windowWidth/2, windowHeight/2);
-        warped=1;
     }
     prev_mouse_X=x;
     prev_mouse_Y=y;
     // printf("deltax: %f, deltay: %f\n",deltaX,deltaY);
     viewAzimuth.curr+=deltaX*viewAzimuthdt/100;
     viewElevation.curr-=deltaY*viewElevationdt/100;
-
+    /*proveri da l su azimut i elevacija 0 do 360 i -max do max*/
+    if (viewAzimuth.curr>=360 ){
+        viewAzimuth.curr-=360;
+        viewAzimuth.goal-=360;
+    }else if (viewAzimuth.curr<0){
+        viewAzimuth.curr+=360;
+    }
     if (viewElevation.curr>MAX_ELEVATION)
         viewElevation.curr=MAX_ELEVATION;
-    if (viewElevation.curr<-MAX_ELEVATION)
-            viewElevation.curr=-MAX_ELEVATION;
-    viewAzimuth.goal=viewAzimuth.curr;
-    viewElevation.goal=viewElevation.curr;
-    // printf("acurr%f, agoal%f\n",viewAzimuth.curr,viewAzimuth.goal);
+    else if (viewElevation.curr<-MAX_ELEVATION)
+        viewElevation.curr=-MAX_ELEVATION;
 }
+
 /*isto kao i onMouseLook, sem sto se poziva umesto nje
 kada je pritisnuto dugme*/
 void onMousePressedLook(int x, int y)
 {
-    if (warped){
-        warped=0;
+    if (x == windowWidth/2 && y == windowHeight/2)
         return;
-    }
     float deltaX;
     float deltaY;
     if (releaseMouse){
@@ -78,19 +76,22 @@ void onMousePressedLook(int x, int y)
         deltaX = x - windowWidth/2;
         deltaY = y - windowHeight/2;
         glutWarpPointer(windowWidth/2, windowHeight/2);
-        warped=1;
     }
     prev_mouse_X=x;
     prev_mouse_Y=y;
     viewAzimuth.curr+=deltaX*viewAzimuthdt/100;
     viewElevation.curr-=deltaY*viewElevationdt/100;
 
+    if (viewAzimuth.curr>=360 ){
+        viewAzimuth.curr-=360;
+        viewAzimuth.goal-=360;
+    }else if (viewAzimuth.curr<0){
+        viewAzimuth.curr+=360;
+    }
     if (viewElevation.curr>MAX_ELEVATION)
         viewElevation.curr=MAX_ELEVATION;
-    if (viewElevation.curr<-MAX_ELEVATION)
-            viewElevation.curr=-MAX_ELEVATION;
-    viewAzimuth.goal=viewAzimuth.curr;
-    viewElevation.goal=viewElevation.curr;
+    else if (viewElevation.curr<-MAX_ELEVATION)
+        viewElevation.curr=-MAX_ELEVATION;
 }
 
 void onKeyHold()
@@ -109,21 +110,12 @@ void onKeyHold()
         player.vx.goal=0.05+state.goFast*0.1;
 }
 
+/*ne treba mi vise al nek stoji za ukras*/
 void onSpecialInputUp(int key, int x, int y)
 {
     switch(key)
     {
-        case (GLUT_KEY_RIGHT):
-            viewAzimuth.goal=viewAzimuth.curr;
-            break;
-        case (GLUT_KEY_LEFT):
-            viewAzimuth.goal=viewAzimuth.curr;
-            break;
-        case (GLUT_KEY_UP):
-            viewElevation.goal=viewElevation.curr;
-            break;
-        case (GLUT_KEY_DOWN):
-            viewElevation.goal=viewElevation.curr;
+        default:
             break;
     }
 }
@@ -144,12 +136,11 @@ void onSpecialInput(int key, int x, int y)
                 viewElevation.goal=MAX_ELEVATION;
             break;
         case (GLUT_KEY_DOWN):
-            viewElevation.goal-=viewElevationdt;
+            viewElevation.curr-=viewElevationdt;
             if (viewElevation.goal<-MAX_ELEVATION)
                 viewElevation.goal=-MAX_ELEVATION;
             break;
     }
-
 }
 
 void onKeyboardUp(unsigned char key, int x, int y)

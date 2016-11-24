@@ -18,5 +18,5 @@ extern Color getColor(Object o);
 extern void resetGame(void);
 extern void freezeGame(void);
 extern int animationOngoing;
-
+extern void normalize3f(float* x, float* y, float* z);
 #endif

@@ -12,9 +12,10 @@
 static void onDisplay(void);
 int dt;
 void onTimerUpdate(int id);
-static void updatedt(void);
-/*TODO skok uz zid da ne bude kolizija, sredi sve funkcije da budu po pointeru*/
-/*, zavrsi level. boje mogu da budu malo vise fun*/
+static void updateDeltaTime(void);
+static void fps(void);
+
+/*TODO skok uz zid da ne bude kolizija, boje mogu da budu malo vise fun*/
 int main(int argc, char ** argv)
 {
     glutInit(&argc,argv);
@@ -57,7 +58,7 @@ int main(int argc, char ** argv)
 void onDisplay(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    fps();
     positionCam();
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -76,13 +77,11 @@ void onTimerUpdate(int id)
     if (TIMER_UPDATE_ID!=id){
         return;
     }
-updatedt();
+    updateDeltaTime();
     movePlayer();
     playerCollision();
     bulletCollision();
     moveBullets();
-
-    updateCamAngle();
 
     glutPostRedisplay();
     if (animationOngoing){
@@ -91,26 +90,28 @@ updatedt();
 }
 
 #define DT_MAX 60
-
-/*racunanje dt-vremena izmedju 2 frejma. verovatno mi ni nece trebati*/
-void updatedt(void)
+static int newTime;
+static int oldTime=0;
+static int timeSum=0;
+/*racunanje dt-vremena izmedju 2 poziva onTimerUpdate funkcije*/
+void updateDeltaTime(void)
 {
-    static int timeSum=0;
-    static int newTime;
-    static int oldTime=0;
-    static int frame=0;
     newTime=glutGet(GLUT_ELAPSED_TIME);
     dt=newTime-oldTime;
     oldTime=newTime;
     timeSum+=dt;
+    if (dt>DT_MAX)
+        dt=DT_MAX;
+}
+
+/*racuna frames per second*/
+void fps(void)
+{
+    static int frame=0;
     frame++;
     if (timeSum>=1000){
-        printf("fps:%f\n",frame*1000/(float)timeSum);
+        //printf("fps:%f\n",frame*1000/(float)timeSum);
         timeSum=0;
         frame=0;
     }
-    /*if (frame%60==0)
-        printf("frame %d\n",frame);*/
-    if (dt>DT_MAX)
-        dt=DT_MAX;
 }

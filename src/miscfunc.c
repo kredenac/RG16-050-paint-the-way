@@ -15,6 +15,14 @@ float approach(float goal, float curr, float dt)
     return goal;
 }
 
+void normalize3f(float* x, float* y, float* z)
+{
+    float n=sqrt(*x**x+*y**y+*z**z);
+    *x=*x/n;
+    *y=*y/n;
+    *z=*z/n;
+}
+
 void setColor(Object* op, float r, float g, float b)
 {
     op->color[0]=r;

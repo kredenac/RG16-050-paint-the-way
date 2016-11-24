@@ -24,7 +24,6 @@ const State stateInit={
 Object player;
 extern int dt;
 
-
 float GRAVITY=-1;
 float rotWorld;
 Val2f viewAzimuth;
@@ -36,18 +35,18 @@ float playerHeadHeight=0.25;
 float JUMP_V=0.1;
 
 static float* moveRightCam(void);
-static float* moveForwardCam(void);
+static float* moveForwardCam(int yZero);
+static void checkEvents(void);
+/*lastpos - prosla pozicija se pamti zbog racuna pri koliziji*/
 float lastPosx, lastPosz;
 void movePlayer(){
     /*ako je neko dugme pritisnuto azuriraj brzine*/
     onKeyHold();
-    if (!state.jumping)
-        GRAVITY=0;
-    else
-        GRAVITY=-1;
+    /*jedino ako je igrac u vazduhu ima razloga da ga teram dole*/
+    GRAVITY=state.jumping ? -1 : 0;
     /*vektori napred i desno relativno od kamere*/
     float * r=moveRightCam();
-    float * f=moveForwardCam();
+    float * f=moveForwardCam(1);
     /*brzine postepeno idu ka ciljnim*/
     player.vz.curr=approach(player.vz.goal, player.vz.curr, dt/(float)5000);
     player.vx.curr=approach(player.vx.goal, player.vx.curr, dt/(float)5000);
@@ -65,9 +64,14 @@ void movePlayer(){
     /*pomeraj napred-nazad u odnosu na kameru*/
     player.posz+=f[2]*player.vz.curr;
     player.posx+=f[0]*player.vz.curr;
-
     player.posy+=player.vy.curr;
-    if (player.posy>=11.7 && player.posy<=12 && player.posx>-0.8 && player.posx<0.8 && player.posz<=-17.2 && player.posz>=-18.8){
+    checkEvents();
+}
+
+/*proverava da li se igrac nalazi na mestu gde se triggeruje neki event*/
+void checkEvents()
+{
+    if (player.posy>=11.6 && player.posy<=12 && player.posx>-0.8 && player.posx<0.8 && player.posz<=-17.2 && player.posz>=-18.8){
         state.finishedGame=1;
     }
 }
@@ -75,7 +79,7 @@ void movePlayer(){
 /*pomeranje levo-desno u odnosu na kameru*/
 static float* moveRightCam(void)
 {
-    /*todo normalize func*/
+
     static float v[3];
     float ax=lookAtx-eyex;
     float ay=lookAty-eyey;
@@ -89,14 +93,14 @@ static float* moveRightCam(void)
 }
 
 /*pomeranje napred-nazad u odnosu na  kameru*/
-static float* moveForwardCam(void)
+static float* moveForwardCam(int yZero)
 {
-    /*todo normalize func*/
+
     static float v[3];
     v[0]=lookAtx-eyex;
-    v[1]=lookAty-eyey;
+    v[1]=yZero!=0 ? 0 :lookAty-eyey;
     v[2]=lookAtz-eyez;
-
+    normalize3f(v,v+1,v+2);
     return v;
 }
 
@@ -121,7 +125,7 @@ void firePaint()
             set3fWithColor(state.fireColor,&r,&g,&b);
             setColor(&bullets[i], r, g, b);
             /*postavljanje vektora brzine metka na tacku gde igrac gleda*/
-            float* v=moveForwardCam();
+            float* v=moveForwardCam(0);
             bullets[i].vx.curr=v[0]/BULLET_SPEED;
             bullets[i].vy.curr=v[1]/BULLET_SPEED;
             bullets[i].vz.curr=v[2]/BULLET_SPEED;
@@ -152,23 +156,5 @@ void resetBullets()
     int i;
     for (i=0;i<MAX_BULLETS;i++){
         bullets_active[i]=0;
-    }
-}
-
-/*azuriranje parametra rotacije kamere*/
-void updateCamAngle(void)
-{
-    viewAzimuth.curr=approach(viewAzimuth.goal, viewAzimuth.curr, dt/(float)20);
-    //printf("curr:%f goal:%f\n",viewAzimuth.curr,viewAzimuth.goal);
-    if (viewAzimuth.curr>=360 && viewAzimuth.goal>=360){
-        viewAzimuth.curr-=360;
-        viewAzimuth.goal-=360;
-    }else if (viewAzimuth.curr<0 && viewAzimuth.goal<0){
-        viewAzimuth.curr+=360;
-        viewAzimuth.goal+=360;
-    }
-    viewElevation.curr=approach(viewElevation.goal, viewElevation.curr, dt/(float)20);
-    if (viewElevation.curr>MAX_ELEVATION){
-        viewElevation.curr=MAX_ELEVATION;
     }
 }

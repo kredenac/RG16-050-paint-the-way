@@ -16,9 +16,9 @@ extern GLfloat light_direction2[];
 extern void drawCube(Object o);
 extern void drawWithColor(Object o);
 extern void drawBullets(void);
-extern void map();
-extern void initCubes();
-extern void lightSetup();
-extern void materialSetup();
-extern void psychedelic();
+extern void map(void);
+extern void initCubes(void);
+extern void lightSetup(void);
+extern void materialSetup(void);
+extern void psychedelic(int interval);
 #endif
