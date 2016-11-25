@@ -44,13 +44,14 @@ int hasCollision(Object a, Object b)
 static float kneeHeight=0.35;
 int isAbove(Object a, Object b)
 {
-    return a.posy - kneeHeight > b.posy + b.height/2;
+    return lastPosy - kneeHeight > b.posy + b.height/2;
 }
 
 int isBelow(Object a, Object b)
 {
-    //return a.posy  < b.posy - b.height/2;
-    return a.posy - playerHeadHeight + player.height/2 < b.posy - b.height/2;
+    //ax=lastPosx; az=lastPosz;
+    //return a.posy - playerHeadHeight + player.height/2 < b.posy - b.height/2;
+    return lastPosy - playerHeadHeight + player.height/2 < b.posy - b.height/2;
 }
 
 /*kada ima kolizije da se odluci sa koje strane b je*/
@@ -119,7 +120,6 @@ void playerCollision(void)
                 }
                 /*kolizija sa plafonom*/
             }else if(isBelow(player,p)){
-                /*TODO: ulepsaj, mada ok je sad*/
                 player.posy-=eps;
                 if (player.vy.curr>0){
                     player.vy.curr=-player.vy.curr/2;

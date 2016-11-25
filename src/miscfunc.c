@@ -25,6 +25,7 @@ void normalize3f(float* x, float* y, float* z)
 
 void setColor(Object* op, float r, float g, float b)
 {
+    
     op->color[0]=r;
     op->color[1]=g;
     op->color[2]=b;

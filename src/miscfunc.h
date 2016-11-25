@@ -6,7 +6,7 @@
 #include "player.h"
 #include "draw.h"
 #define TIMER_UPDATE_ID 1
-#define UPDATE_TIMER_INTVAL 17
+#define UPDATE_TIMER_INTVAL 17//17
 
 
 

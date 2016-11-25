@@ -39,10 +39,11 @@ static float* moveForwardCam(int yZero);
 static void checkEvents(void);
 static int firstFreeLight(void);
 
-
 /*lastpos - prosla pozicija se pamti zbog racuna pri koliziji*/
-float lastPosx, lastPosz;
+float lastPosx, lastPosz, lastPosy;
 void movePlayer(){
+    float d=dt/(float)17;
+    //printf("DISTANCE=%f\n",d);
     /*ako je neko dugme pritisnuto azuriraj brzine*/
     onKeyHold();
     /*jedino ako je igrac u vazduhu ima razloga da ga teram dole*/
@@ -61,13 +62,14 @@ void movePlayer(){
     //printf("xcurr%f, xgoal%f, zcurr%f ,zgoal%f\n",player.vx.curr,player.vx.goal,player.vz.curr,player.vz.goal);
     lastPosx=player.posx;
     lastPosz=player.posz;
+    lastPosy=player.posy;
     /*pomeraj levo-desno u odnosu na kameru*/
-    player.posx+=r[0]*player.vx.curr;
-    player.posz+=r[2]*player.vx.curr;
+    player.posx+=r[0]*player.vx.curr*dt/17.0;
+    player.posz+=r[2]*player.vx.curr*dt/17.0;
     /*pomeraj napred-nazad u odnosu na kameru*/
-    player.posz+=f[2]*player.vz.curr;
-    player.posx+=f[0]*player.vz.curr;
-    player.posy+=player.vy.curr;
+    player.posz+=f[2]*player.vz.curr*dt/17.0;
+    player.posx+=f[0]*player.vz.curr*dt/17.0;
+    player.posy+=player.vy.curr*dt/17.0;
     checkEvents();
 }
 
@@ -111,7 +113,7 @@ static float* moveForwardCam(int yZero)
 Object bullets[MAX_BULLETS];
 int bullets_active[MAX_BULLETS];
 
-#define BULLET_SPEED 10
+#define BULLET_SPEED 5
 void firePaint()
 {
     int i=0;
@@ -142,12 +144,13 @@ nakon max_bullet_life nestane.*/
 static const float MAX_BULLET_LIFE=1000;
 void moveBullets(void)
 {
+    float d=dt/(float)17;
     int i;
     for (i=0;i<MAX_BULLETS;i++)
         if (bullets_active[i]){
-            bullets[i].posx+=bullets[i].vx.curr;
-            bullets[i].posy+=bullets[i].vy.curr;
-            bullets[i].posz+=bullets[i].vz.curr;
+            bullets[i].posx+=bullets[i].vx.curr*d;
+            bullets[i].posy+=bullets[i].vy.curr*d;
+            bullets[i].posz+=bullets[i].vz.curr*d;
             bullets[i].vx.goal++;
             if (bullets[i].vx.goal>MAX_BULLET_LIFE)
                 bullets_active[i]=0;
@@ -186,7 +189,8 @@ void paintBlock(Object* block, Object* bullet)
         setLightPos(n, bullet->posx, bullets->posy, bullets->posz);
         psychedelic(1);
     }
-    setColor(block,bullets->color[0],bullet->color[1],bullets->color[2]);
+
+    setColor(block,bullet->color[0],bullet->color[1],bullet->color[2]);
 }
 
 /*bira se prvi slobodan slot ili najstariji*/

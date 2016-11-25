@@ -57,7 +57,7 @@ extern void positionCam(void);
 extern void onKeyHold(void);
 extern Object player;
 
-extern float lastPosx, lastPosz;
+extern float lastPosx, lastPosz, lastPosy;
 extern float GRAVITY;
 extern float rotWorld;
 extern Val2f viewAzimuth;
