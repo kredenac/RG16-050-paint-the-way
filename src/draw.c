@@ -1,6 +1,6 @@
 #include "draw.h"
-GLfloat light_position2[] = { 0, -1, 0, 1 };
-GLfloat light_direction2[] = { 0, -1, 0};
+float light_position[] = { 0, -1, 0, 1 };
+float light_direction[] = { 0, -1, 0};
 int paintedLightIsOn;
 
 /******************/
@@ -51,6 +51,10 @@ void addBlocks(float begx, float endx, float begy, float endy, float begz, float
     printf("novi blokovi:%d ukupno:%d\n",count,NUM_BLOCKS);
 }
 
+int lightOn[MAX_LIGHTS];
+int lights[]={GL_LIGHT0,GL_LIGHT1,GL_LIGHT2,GL_LIGHT3,
+    GL_LIGHT4,GL_LIGHT5,GL_LIGHT6,GL_LIGHT7};
+
 void lightSetup()
 {
     /* u pitanju je poziciono svetlo
@@ -67,25 +71,51 @@ void lightSetup()
     glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
     glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
     glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 90.0);*/
-    GLfloat light_ambient2[] = { 0.3, 0.3, 0.3, 0.2};
-    GLfloat light_diffuse2[] = { 0.4, 0.4, 0.4, 0.2 };
-    GLfloat light_specular2[] = { 0.2, 0.2, 0.2, 0.1 };
 
     glEnable(GL_LIGHTING);
-    paintedLightIsOn ? glEnable(GL_LIGHT2) : glDisable(GL_LIGHT2);
-    glLightfv(GL_LIGHT2, GL_POSITION, light_position2);
-    glLightfv(GL_LIGHT2, GL_SPOT_DIRECTION, light_direction2);
-    glLightfv(GL_LIGHT2, GL_AMBIENT, light_ambient2);
-    glLightfv(GL_LIGHT2, GL_DIFFUSE, light_diffuse2);
-    glLightfv(GL_LIGHT2, GL_SPECULAR, light_specular2);
-    glLightf(GL_LIGHT2, GL_SPOT_CUTOFF, 69.0);
+    int i;
+    for (i=0; i<MAX_LIGHTS; i++){
+        if (lightOn[i]){
+            glEnable(lights[i]);
+        }else{
+            glDisable(lights[i]);
+        }
+    }
+}
+void initLights()
+{
+    float light_ambient[] = { 0.3, 0.3, 0.3, 1};
+    float light_diffuse[] = { 0.7, 0.7, 0.7, 1 };
+    float light_specular[] = { 0.2, 0.2, 0.2, 0.1 };
+    int i;
+    for (i=0; i<MAX_LIGHTS; i++){
+        glLightfv(lights[i], GL_SPOT_DIRECTION, light_direction);
+        glLightfv(lights[i], GL_AMBIENT, light_ambient);
+        glLightfv(lights[i], GL_DIFFUSE, light_diffuse);
+        glLightfv(lights[i], GL_SPECULAR, light_specular);
+        /*opadanje intenziteta svetlosti u zavisnosti od razdaljine*/
+        glLightf(lights[i], GL_CONSTANT_ATTENUATION, 0);
+        glLightf(lights[i], GL_LINEAR_ATTENUATION, 0.3);
+        glLightf(lights[i],GL_QUADRATIC_ATTENUATION, 0.01);
+        glLightf(lights[i], GL_SPOT_CUTOFF, 180.0);
+    }
+}
 
+void setLightPos(int n, float x, float y, float z)
+{
+    float light_position[4];
+    light_position[0] =x;
+    light_position[1] =y;
+    light_position[2] =z;
+    light_position[3] =1;
+    glLightfv(lights[n], GL_POSITION, light_position);
 }
 
 void materialSetup()
 {
     /* Koeficijenti ambijentalne refleksije materijala. */
-    GLfloat ambient_coeffs[] = { 0.2, 0.2, 0.2, 1 };
+    GLfloat ambient_coeffs[] = { 0, 0, 0, 1 };
+    //GLfloat ambient_coeffs[] = { 0.2, 0.2, 0.2, 1 };
     /* Koeficijenti difuzne refleksije materijala. */
     GLfloat diffuse_coeffs[] = { 0.4, 0.4, 0.4, 1 };
     /* Koeficijenti spekularne refleksije materijala. */
@@ -100,10 +130,17 @@ void materialSetup()
 
 void drawWithColor(Object o)
 {
-    GLfloat diffuse_coeffs[] = { o.color[0],o.color[1],o.color[2], 1 };
+    GLfloat diffuse_coeffs[] = {o.color[0], o.color[1], o.color[2], 1 };
     /*potamnjuje ambinet ceffs*/
-    float s=0.3;
-    GLfloat ambient_coeffs[] = { o.color[0]*s,o.color[1]*s,o.color[2]*s, 1 };
+    float s=0;//0.3;
+    GLfloat ambient_coeffs[] = {o.color[0]*s, o.color[1]*s, o.color[2]*s, 1 };
+    GLfloat emission_coeffs[] = { 0.5, 0.5, 0.5, 1 };
+    GLfloat emission_coeffs2[] = { 0, 0, 0, 0 };
+    if (getColor(o)==WHITE){
+        glMaterialfv(GL_FRONT, GL_EMISSION, emission_coeffs);
+    }else{
+        glMaterialfv(GL_FRONT, GL_EMISSION, emission_coeffs2);
+    }
     glMaterialfv(GL_FRONT, GL_AMBIENT, ambient_coeffs);
     glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_coeffs);
 }
@@ -152,8 +189,10 @@ void psychedelic(int interval)
     c=0;
     int i;
     for(i=0; i<NUM_BLOCKS; i++){
-        setColor(blocks[i], (float)rand()/(float)(RAND_MAX),
-            (float)rand()/(float)(RAND_MAX), (float)rand()/(float)(RAND_MAX));
+        if (getColor(*blocks[i])!=WHITE){
+            setColor(blocks[i], (float)rand()/(float)(RAND_MAX),
+                (float)rand()/(float)(RAND_MAX), (float)rand()/(float)(RAND_MAX));
+        }
     }
 }
 void initCubes()
@@ -168,12 +207,16 @@ void initCubes()
 
     /*veliki levi i desni zidovi*/
     sizex=2,sizey=4,sizez=4;
-    addBlocks(-5,-5,0.5,6,5,-25);
-    addBlocks(5,5,0.5,6,5,-25);
-    /*zid iza*/
+    addBlocks(-5,-5,0.5,9,5,-25);
+    addBlocks(5,5,0.5,9,5,-25);
+    /*veliki napred*/
+    sizex=4,sizey=4,sizez=2;
+    addBlocks(-4,4,0.5,9,-26,-26);
+    /*veliki iza*/
     sizex=4,sizey=4,sizez=4;
-    addBlocks(-4,4,0.5,6,6.5,6.5);
+    addBlocks(-4,4,0.5,9,6.5,6.5);
     sizex=sizey=sizez=2;
+
     /*2 rupe ispod*/
     addBlocks(-1,1,-2,-2,2,2);
     /*iza starta ploce*/
@@ -207,10 +250,7 @@ void initCubes()
     sizex=sizey=sizez=2;
     /*platforma koja se boji u plavo i narandzasto*/
     addBlocks(-4,4,2,2,-22,-25);
-    /*zid iza */
-    sizex=4,sizey=4,sizez=2;
-    addBlocks(-4,4,0.5,6,-26,-26);
-    sizex=sizey=sizez=2;
+
     /*landing na poslednju plat*/
     addBlocks(-1,1,4.0625,4.125,-14,-14);
     sizex=2,sizey=0.25,sizez=2;
@@ -226,7 +266,7 @@ void initCubes()
     addBlocks(-1,1,6,6,-10,-10);
     addBlocks(-1,-1,6,6,-9,-9);
     addBlocks(1,1,6,6,-9,-9);
-
+    addBlocks(0,0,5.7,5.7,-8,-8);
     /*sredi ovu rugobu*/
     static Object cubes[11];
     cubes[0]=(Object){

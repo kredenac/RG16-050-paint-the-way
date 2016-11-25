@@ -48,6 +48,7 @@ extern const State stateInit;
 * sluzi za pozicioniranje kamere*/
 extern float playerHeadHeight;
 extern const Object playerInit;
+extern void paintBlock(Object* block, Object* bullet);
 extern void movePlayer(void);
 extern void firePaint(void);
 extern void resetBullets(void);

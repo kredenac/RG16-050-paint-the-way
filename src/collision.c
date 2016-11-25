@@ -149,6 +149,7 @@ void playerCollision(void)
     }
 }
 
+
 /*prodji kroz sve slotove, ako je aktivan metak proveri koliziju sa kockama*/
 void bulletCollision(void)
 {
@@ -158,19 +159,7 @@ void bulletCollision(void)
             for (j=0; j<NUM_BLOCKS; j++){
                 if (hasCollision(*blocks[j],bullets[i])){
                     bullets_active[i]=0;
-                    if (getColor(bullets[i])==WHITE){
-                        psychedelic(1);
-                        paintedLightIsOn=1;
-                        light_position2[0] =bullets[i].posx;
-                        light_position2[1] =bullets[i].posy;
-                        light_position2[2] =bullets[i].posz;
-                        light_position2[3] =1;
-                        light_direction2[0]=-bullets[i].vx.curr;
-                        light_direction2[1]=-bullets[i].vy.curr;
-                        light_direction2[2]=-bullets[i].vz.curr;
-                    }
-                    setColor(blocks[j],bullets[i].color[0],bullets[i].color[1],bullets[i].color[2]);
-                    /*ako ima kolizije sa kockom ne proveravaj ostale*/
+                    paintBlock(blocks[j],&bullets[i]);
                     break;
                 }
             }

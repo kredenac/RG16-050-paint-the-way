@@ -8,10 +8,10 @@
 
 extern int NUM_BLOCKS;
 extern Object* blocks[];
-extern int paintedLightIsOn;
-extern GLfloat light_position2[];
-extern GLfloat light_direction2[];
-
+extern float light_position[];
+extern float light_direction[];
+extern int lightOn[];
+#define MAX_LIGHTS 8
 
 extern void drawCube(Object o);
 extern void drawWithColor(Object o);
@@ -21,4 +21,6 @@ extern void initCubes(void);
 extern void lightSetup(void);
 extern void materialSetup(void);
 extern void psychedelic(int interval);
+extern void setLightPos(int n, float x, float y, float z);
+extern void initLights();
 #endif

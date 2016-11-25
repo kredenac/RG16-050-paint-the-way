@@ -4,7 +4,7 @@ static int KEY_W=0;
 static int KEY_S=0;
 static int KEY_A=0;
 static int KEY_D=0;
-float windowHeight=800,windowWidth;
+float initWindowHeight=800;
 static float viewAzimuthdt=30, viewElevationdt=10;
 float aspectRatio=16/9.0;
 
@@ -15,12 +15,9 @@ void onMouseButton(int button, int state, int x, int y)
 		if (state == GLUT_DOWN) {
 			firePaint();
 		}
-		else  {// state = GLUT_UP
-
-
-		}
 	}
 }
+
 static float prev_mouse_X=500;
 static float prev_mouse_Y=500;
 /*nakon poziva funkcije glutWarpPointer se postavi kursor u centar.
@@ -31,7 +28,9 @@ ako je kursor u centru*/
 static int releaseMouse=0;
 void onMouseLook(int x, int y)
 {
-    if (x == windowWidth/2 && y == windowHeight/2)
+    int width=glutGet(GLUT_WINDOW_WIDTH);
+    int height=glutGet(GLUT_WINDOW_HEIGHT);
+    if (x == width/2 && y == height/2)
         return;
     float deltaX;
     float deltaY;
@@ -39,9 +38,9 @@ void onMouseLook(int x, int y)
         deltaX = x - prev_mouse_X;
         deltaY = y - prev_mouse_Y;
     }else{
-        deltaX = x - windowWidth/2;
-        deltaY = y - windowHeight/2;
-        glutWarpPointer(windowWidth/2, windowHeight/2);
+        deltaX = x - width/2;
+        deltaY = y - height/2;
+        glutWarpPointer(width/2, height/2);
     }
     prev_mouse_X=x;
     prev_mouse_Y=y;
@@ -62,52 +61,26 @@ void onMouseLook(int x, int y)
 }
 
 /*isto kao i onMouseLook, sem sto se poziva umesto nje
-kada je pritisnuto dugme*/
+kada je pritisnuto dugme misa*/
 void onMousePressedLook(int x, int y)
 {
-    if (x == windowWidth/2 && y == windowHeight/2)
-        return;
-    float deltaX;
-    float deltaY;
-    if (releaseMouse){
-        deltaX = x - prev_mouse_X;
-        deltaY = y - prev_mouse_Y;
-    }else{
-        deltaX = x - windowWidth/2;
-        deltaY = y - windowHeight/2;
-        glutWarpPointer(windowWidth/2, windowHeight/2);
-    }
-    prev_mouse_X=x;
-    prev_mouse_Y=y;
-    viewAzimuth.curr+=deltaX*viewAzimuthdt/100;
-    viewElevation.curr-=deltaY*viewElevationdt/100;
-
-    if (viewAzimuth.curr>=360 ){
-        viewAzimuth.curr-=360;
-        viewAzimuth.goal-=360;
-    }else if (viewAzimuth.curr<0){
-        viewAzimuth.curr+=360;
-    }
-    if (viewElevation.curr>MAX_ELEVATION)
-        viewElevation.curr=MAX_ELEVATION;
-    else if (viewElevation.curr<-MAX_ELEVATION)
-        viewElevation.curr=-MAX_ELEVATION;
+    onMouseLook(x,y);
 }
 
 void onKeyHold()
 {
-    //int bonus=(state.goFast)? 0.1 : 0;
     /*ako ide brzo a nije na narandzastom */
     if (fabsf(player.vz.curr>0.1) && !state.goFast)
         return;
+    float bonus=(state.goFast)? 0.1 : 0;
     if (KEY_W)
-        player.vz.goal=0.05+state.goFast*0.1;
+        player.vz.goal=0.05 + bonus;
     if (KEY_S)
-        player.vz.goal=-0.05-state.goFast*0.1;
+        player.vz.goal=-0.05 - bonus;
     if (KEY_A)
-        player.vx.goal=-0.05-state.goFast*0.1;
+        player.vx.goal=-0.05 - bonus;
     if (KEY_D)
-        player.vx.goal=0.05+state.goFast*0.1;
+        player.vx.goal=0.05 + bonus;
 }
 
 /*ne treba mi vise al nek stoji za ukras*/
@@ -125,20 +98,20 @@ void onSpecialInput(int key, int x, int y)
     switch(key)
     {
         case (GLUT_KEY_RIGHT):
-            viewAzimuth.goal+=viewAzimuthdt;
+            viewAzimuth.curr+=viewAzimuthdt;
             break;
         case (GLUT_KEY_LEFT):
-            viewAzimuth.goal-=viewAzimuthdt;
+            viewAzimuth.curr-=viewAzimuthdt;
             break;
         case (GLUT_KEY_UP):
-            viewElevation.goal+=viewElevationdt;
-            if (viewElevation.goal>MAX_ELEVATION)
-                viewElevation.goal=MAX_ELEVATION;
+            viewElevation.curr+=viewElevationdt;
+            if (viewElevation.curr>MAX_ELEVATION)
+                viewElevation.curr=MAX_ELEVATION;
             break;
         case (GLUT_KEY_DOWN):
             viewElevation.curr-=viewElevationdt;
-            if (viewElevation.goal<-MAX_ELEVATION)
-                viewElevation.goal=-MAX_ELEVATION;
+            if (viewElevation.curr<-MAX_ELEVATION)
+                viewElevation.curr=-MAX_ELEVATION;
             break;
     }
 }
@@ -162,7 +135,6 @@ void onKeyboardUp(unsigned char key, int x, int y)
             KEY_S=0;
             player.vz.goal=0;
             break;
-
     }
 }
 
@@ -172,20 +144,12 @@ void onKeyboard(unsigned char key, int x, int y)
     switch(key){
         case('f'):
             firePaint();
-            glutWarpPointer(windowWidth/2, windowHeight/2);
             break;
         case(' '):
             if (!state.jumping){
                 player.vy.goal=JUMP_V+state.bigJump*0.1;
                 state.bigJump=0;
                 state.jumping=1;
-            }
-            break;
-        case('S'):
-            if (!animationOngoing){
-                resetGame();
-            }else{
-                freezeGame();
             }
             break;
         case('s'):
@@ -205,8 +169,8 @@ void onKeyboard(unsigned char key, int x, int y)
             player.vx.goal=0.05+state.goFast*0.15;
             break;
         case('r'):
-            glutFullScreen();
             resetGame();
+            glutFullScreen();
             break;
         case ('1'):
             state.fireColor=WHITE;
@@ -236,16 +200,11 @@ void onKeyboard(unsigned char key, int x, int y)
     //printf("feet pos: x=%f, y=%f, z=%f\n",player.posx,player.posy-player.height/2,player.posz);
 }
 
-
 void onReshape(int width, int height)
 {
-
     width=aspectRatio*height;
-    windowHeight=height;
-    windowWidth=width;
     glutReshapeWindow(width, height);
     glViewport(0, 0, width, height);
-
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(60.0, (float) width / height, 0.1, 100.0);

@@ -37,6 +37,9 @@ float JUMP_V=0.1;
 static float* moveRightCam(void);
 static float* moveForwardCam(int yZero);
 static void checkEvents(void);
+static int firstFreeLight(void);
+
+
 /*lastpos - prosla pozicija se pamti zbog racuna pri koliziji*/
 float lastPosx, lastPosz;
 void movePlayer(){
@@ -88,7 +91,7 @@ static float* moveRightCam(void)
     v[0]=ay*upz -upy*az;
     v[1]=0;
     v[2]=ax*upy - ay*upx;
-
+    normalize3f(v,v+1,v+2);
     return v;
 }
 
@@ -157,4 +160,52 @@ void resetBullets()
     for (i=0;i<MAX_BULLETS;i++){
         bullets_active[i]=0;
     }
+}
+
+static Object* lightBlock[MAX_LIGHTS];
+static int lightAge[MAX_LIGHTS];
+
+void paintBlock(Object* block, Object* bullet)
+{
+    /*ako treba obojiti beli blok onda iskljuci njegovo svetlo*/
+    if (getColor(*block)==WHITE){
+        int k;
+        for (k=0; k<MAX_LIGHTS; k++){
+            if (lightBlock[k]==block){
+                lightOn[k]=0;
+                lightAge[k]=0;
+            }
+        }
+    }
+    /*ako treba obojiti blok u belo postavi mu svetlo*/
+    if (getColor(*bullet)==WHITE){
+        int n=firstFreeLight();
+        lightBlock[n]=block;
+        lightOn[n]=1;
+        lightAge[n]=glutGet(GLUT_ELAPSED_TIME);//vreme kada je stavljeno
+        setLightPos(n, bullet->posx, bullets->posy, bullets->posz);
+        psychedelic(1);
+    }
+    setColor(block,bullets->color[0],bullet->color[1],bullets->color[2]);
+}
+
+/*bira se prvi slobodan slot ili najstariji*/
+int firstFreeLight(void)
+{
+    int i;
+    /*ne mogu biti starije od trenutnog vremena*/
+    int oldest=glutGet(GLUT_ELAPSED_TIME)+1;
+    int oldestIndex;
+    for (i=0; i<MAX_LIGHTS; i++){
+        if (lightOn[i]==0){
+            return i;
+        }
+        if (oldest > lightAge[i]){
+            oldest=lightAge[i];
+            oldestIndex=i;
+        }
+    }
+    /*Block koji je bio najstariji prestaje da svetli*/
+    setColor(lightBlock[oldestIndex], 0, 0, 0);
+    return oldestIndex;
 }

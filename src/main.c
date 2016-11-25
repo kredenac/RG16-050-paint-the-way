@@ -13,15 +13,15 @@ static void onDisplay(void);
 int dt;
 void onTimerUpdate(int id);
 static void updateDeltaTime(void);
-static void fps(void);
+static void fps(int print);
 
 /*TODO skok uz zid da ne bude kolizija, boje mogu da budu malo vise fun*/
-int main(int argc, char ** argv)
+int main(int argc, char** argv)
 {
     glutInit(&argc,argv);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 
-    glutInitWindowSize(aspectRatio*windowHeight,windowHeight);
+    glutInitWindowSize(aspectRatio*initWindowHeight,initWindowHeight);
     glutInitWindowPosition(0,0);
     glutCreateWindow("Paint the Way");
     glutDisplayFunc(onDisplay);
@@ -58,7 +58,7 @@ int main(int argc, char ** argv)
 void onDisplay(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    fps();
+    fps(2);
     positionCam();
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
@@ -84,9 +84,7 @@ void onTimerUpdate(int id)
     moveBullets();
 
     glutPostRedisplay();
-    if (animationOngoing){
-        glutTimerFunc(UPDATE_TIMER_INTVAL, onTimerUpdate, TIMER_UPDATE_ID);
-    }
+    glutTimerFunc(UPDATE_TIMER_INTVAL, onTimerUpdate, TIMER_UPDATE_ID);
 }
 
 #define DT_MAX 60
@@ -105,12 +103,12 @@ void updateDeltaTime(void)
 }
 
 /*racuna frames per second*/
-void fps(void)
+void fps(int print)
 {
     static int frame=0;
     frame++;
-    if (timeSum>=1000){
-        //printf("fps:%f\n",frame*1000/(float)timeSum);
+    if (print && timeSum>=1000){
+        printf("fps:%f\n",frame*1000/(float)timeSum);
         timeSum=0;
         frame=0;
     }
