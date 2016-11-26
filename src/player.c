@@ -52,24 +52,25 @@ void movePlayer(){
     float * r=moveRightCam();
     float * f=moveForwardCam(1);
     /*brzine postepeno idu ka ciljnim*/
-    player.vz.curr=approach(player.vz.goal, player.vz.curr, dt/(float)5000);
-    player.vx.curr=approach(player.vx.goal, player.vx.curr, dt/(float)5000);
-    player.vy.curr=approach(player.vy.goal, player.vy.curr, dt/(float)500);
+    float step=dt/(float)5000;
+    player.vz.curr=approach(player.vz.goal, player.vz.curr, step);
+    player.vx.curr=approach(player.vx.goal, player.vx.curr, step);
+    player.vy.curr=approach(player.vy.goal, player.vy.curr, step*10);
     /*i ciljna brzina opada vremenom ako se ne doda sila na objekat*/
-    player.vz.goal=approach(0, player.vz.goal, dt/(float)50000);
-    player.vx.goal=approach(0, player.vx.goal, dt/(float)50000);
-    player.vy.goal=approach(GRAVITY, player.vy.goal, dt/(float)5000);
+    player.vz.goal=approach(0, player.vz.goal, step/10);
+    player.vx.goal=approach(0, player.vx.goal, step/10);
+    player.vy.goal=approach(GRAVITY, player.vy.goal, step);
     //printf("xcurr%f, xgoal%f, zcurr%f ,zgoal%f\n",player.vx.curr,player.vx.goal,player.vz.curr,player.vz.goal);
     lastPosx=player.posx;
     lastPosz=player.posz;
     lastPosy=player.posy;
     /*pomeraj levo-desno u odnosu na kameru*/
-    player.posx+=r[0]*player.vx.curr*dt/17.0;
-    player.posz+=r[2]*player.vx.curr*dt/17.0;
+    player.posx+=r[0]*player.vx.curr*d;
+    player.posz+=r[2]*player.vx.curr*d;
     /*pomeraj napred-nazad u odnosu na kameru*/
-    player.posz+=f[2]*player.vz.curr*dt/17.0;
-    player.posx+=f[0]*player.vz.curr*dt/17.0;
-    player.posy+=player.vy.curr*dt/17.0;
+    player.posz+=f[2]*player.vz.curr*d;
+    player.posx+=f[0]*player.vz.curr*d;
+    player.posy+=player.vy.curr*d;
     checkEvents();
 }
 
@@ -186,7 +187,7 @@ void paintBlock(Object* block, Object* bullet)
         lightBlock[n]=block;
         lightOn[n]=1;
         lightAge[n]=glutGet(GLUT_ELAPSED_TIME);//vreme kada je stavljeno
-        setLightPos(n, bullet->posx, bullets->posy, bullets->posz);
+        setLightPos(n, bullet->posx, bullet->posy, bullet->posz);
         psychedelic(1);
     }
 

@@ -48,7 +48,7 @@ void addBlocks(float begx, float endx, float begy, float endy, float begz, float
             }
         }
     }
-    printf("novi blokovi:%d ukupno:%d\n",count,NUM_BLOCKS);
+    //printf("novi blokovi:%d ukupno:%d\n",count,NUM_BLOCKS);
 }
 
 int lightOn[MAX_LIGHTS];
@@ -57,21 +57,6 @@ int lights[]={GL_LIGHT0,GL_LIGHT1,GL_LIGHT2,GL_LIGHT3,
 
 void lightSetup()
 {
-    /* u pitanju je poziciono svetlo
-    GLfloat light_position[] = { 3, 10, 10, 1 };
-    GLfloat light_direction[] = { -1, -1, 0};
-    GLfloat light_ambient[] = { 0.3, 0.3, 0.3, 1 };
-    GLfloat light_diffuse[] = { 0.8, 0.8, 0.8, 1 };
-    GLfloat light_specular[] = { 0.9, 0.9, 0.9, 1 };
-    glEnable(GL_LIGHTING);
-    glEnable(GL_LIGHT0);
-    glLightfv(GL_LIGHT0, GL_POSITION, light_position);
-    glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, light_direction);
-    glLightfv(GL_LIGHT0, GL_AMBIENT, light_ambient);
-    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
-    glLightfv(GL_LIGHT0, GL_SPECULAR, light_specular);
-    glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 90.0);*/
-
     glEnable(GL_LIGHTING);
     int i;
     for (i=0; i<MAX_LIGHTS; i++){
@@ -184,14 +169,29 @@ void psychedelic(int interval)
 {
     static int c=0;
     c++;
-    if (c!=interval)
+    if (c<interval)
         return;
     c=0;
     int i;
+    /*poput gradijenta-pocetni se boje pretezno start bojom, a poslednji end bojom*/
+    float start[]={(float)rand()/(float)(RAND_MAX), (float)rand()/(float)(RAND_MAX), (float)rand()/(float)(RAND_MAX)};
+    float end[]={(float)rand()/(float)(RAND_MAX), (float)rand()/(float)(RAND_MAX), (float)rand()/(float)(RAND_MAX)};
+    /*ipak, nece biti cist gradijent nego odstupanja. nice je deo boje od gradijenta, a displace deo od rand odstupanja*/
+    float nice=0.8;
+    float displace=1-nice;
+    float r,g,b;
+    /*s je deo start boje, a e je deo end boje*/
     for(i=0; i<NUM_BLOCKS; i++){
+        float e=(float)i/NUM_BLOCKS;
+        float s=1-e;
         if (getColor(*blocks[i])!=WHITE){
-            setColor(blocks[i], (float)rand()/(float)(RAND_MAX),
-                (float)rand()/(float)(RAND_MAX), (float)rand()/(float)(RAND_MAX));
+            r=start[0]*s + end[0]*e;
+            g=start[1]*s + end[1]*e;
+            b=start[2]*s + end[2]*e;
+            r=r*nice + displace*(float)rand()/(float)(RAND_MAX);
+            g=g*nice + displace*(float)rand()/(float)(RAND_MAX);
+            b=b*nice + displace*(float)rand()/(float)(RAND_MAX);
+            setColor(blocks[i],r,g,b);
         }
     }
 }

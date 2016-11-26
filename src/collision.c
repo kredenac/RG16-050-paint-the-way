@@ -7,8 +7,6 @@ Side aRelativeTob(Object a, Object b);
 void playerCollision(void);
 void bulletCollision(void);
 
-
-
 int rangeIntersect(float mina, float maxa, float minb, float maxb)
 {
     /*mozda da proverim da l je proslednjeni min zaista manji od max?*/
@@ -41,7 +39,26 @@ int hasCollision(Object a, Object b)
     return interx && intery && interz;
 }
 
-static float kneeHeight=0.35;
+/*da li se objekat a nalazi u objektu b, gledajuci samo xz ravan*/
+int aIsInb(Object a, Object b)
+{
+    float mina,maxa,minb,maxb;
+    mina=a.posx-a.length/4;
+    maxa=a.posx+a.length/4;
+    minb=b.posx-b.length/2;
+    maxb=b.posx+b.length/2;
+    int interx=rangeIntersect(mina, maxa, minb, maxb);
+
+    mina=a.posz-a.width/4;
+    maxa=a.posz+a.width/4;
+    minb=b.posz-b.width/2;
+    maxb=b.posz+b.width/2;
+    int interz=rangeIntersect(mina, maxa, minb, maxb);
+
+    return interx && interz;
+}
+
+static float kneeHeight=0.25;
 int isAbove(Object a, Object b)
 {
     return lastPosy - kneeHeight > b.posy + b.height/2;
@@ -49,6 +66,7 @@ int isAbove(Object a, Object b)
 
 int isBelow(Object a, Object b)
 {
+    if (!aIsInb(a,b)) return 0;
     //ax=lastPosx; az=lastPosz;
     //return a.posy - playerHeadHeight + player.height/2 < b.posy - b.height/2;
     return lastPosy - playerHeadHeight + player.height/2 < b.posy - b.height/2;
@@ -83,6 +101,7 @@ Side aRelativeTob(Object a, Object b)
     //printf("%s a.x=%f a.z=%f\n ",(ax<az) ? "Blizi x" : "Blizi z",testx,testz);
     return (ax<az) ? x : z;
 }
+
 /*eps sluzi kao mala velicina za koju odaljim igraca od blokova
 da ne bi bila kolizija */
 static const float eps=0.0001;
@@ -98,25 +117,28 @@ void playerCollision(void)
         if (hasCollision(player,p)){
                 /*kolizija sa podom*/
             if (isAbove(player,p)){
-                player.posy=p.posy + p.height/2 + player.height/2;
-                state.jumping=0;
-                player.vy.curr=0;
+                /*ako je igrac iznad p, ali nije skroz u njemu, ignorise koliziju*/
+                if (aIsInb(player,p)){
+                    player.posy=p.posy + p.height/2 + player.height/2;
+                    state.jumping=0;
+                    player.vy.curr=0;
 
-                Color c=getColor(p);
-                switch(c){
-                    case(BLUE):
-                        state.bigJump=1;
-                        state.goFast=0;
-                        break;
-                    case(ORANGE):
-                        state.goFast=1;
-                        state.bigJump=0;
-                        break;
-                    case(WHITE):
-                    case(OTHER):
-                        state.bigJump=0;
-                        state.goFast=0;
-                        break;
+                    Color c=getColor(p);
+                    switch(c){
+                        case(BLUE):
+                            state.bigJump=1;
+                            state.goFast=0;
+                            break;
+                        case(ORANGE):
+                            state.goFast=1;
+                            state.bigJump=0;
+                            break;
+                        case(WHITE):
+                        case(OTHER):
+                            state.bigJump=0;
+                            state.goFast=0;
+                            break;
+                    }
                 }
                 /*kolizija sa plafonom*/
             }else if(isBelow(player,p)){
@@ -148,7 +170,6 @@ void playerCollision(void)
         }
     }
 }
-
 
 /*prodji kroz sve slotove, ako je aktivan metak proveri koliziju sa kockama*/
 void bulletCollision(void)

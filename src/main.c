@@ -15,7 +15,7 @@ void onTimerUpdate(int id);
 static void updateDeltaTime(void);
 static void fps(int print);
 
-/*TODO skok uz zid da ne bude kolizija, boje mogu da budu malo vise fun*/
+/*TODO boje mogu da budu malo vise fun*/
 int main(int argc, char** argv)
 {
     glutInit(&argc,argv);

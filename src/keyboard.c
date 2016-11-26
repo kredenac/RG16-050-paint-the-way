@@ -5,7 +5,7 @@ static int KEY_S=0;
 static int KEY_A=0;
 static int KEY_D=0;
 float initWindowHeight=800;
-static float viewAzimuthdt=30, viewElevationdt=10;
+static float viewAzimuthdt=15, viewElevationdt=5;
 float aspectRatio=16/9.0;
 
 void onMouseButton(int button, int state, int x, int y)
