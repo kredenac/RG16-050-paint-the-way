@@ -18,7 +18,8 @@ const State stateInit={
     .fireColor=0,
     .bigJump=0,
     .goFast=0,
-    .finishedGame=0
+    .finishedGame=0,
+    .newGame=1
 };
 
 Object player;
@@ -36,13 +37,12 @@ float JUMP_V=0.1;
 
 static float* moveRightCam(void);
 static float* moveForwardCam(int yZero);
-static void checkEvents(void);
 static int firstFreeLight(void);
 
 /*lastpos - prosla pozicija se pamti zbog racuna pri koliziji*/
 float lastPosx, lastPosz, lastPosy;
 void movePlayer(){
-    float d=dt/(float)17;
+    float d=dt/(float)UPDATE_TIMER_INTVAL;
     //printf("DISTANCE=%f\n",d);
     /*ako je neko dugme pritisnuto azuriraj brzine*/
     onKeyHold();
@@ -71,7 +71,6 @@ void movePlayer(){
     player.posz+=f[2]*player.vz.curr*d;
     player.posx+=f[0]*player.vz.curr*d;
     player.posy+=player.vy.curr*d;
-    checkEvents();
 }
 
 /*proverava da li se igrac nalazi na mestu gde se triggeruje neki event*/
@@ -80,12 +79,14 @@ void checkEvents()
     if (player.posy>=11.6 && player.posy<=12 && player.posx>-0.8 && player.posx<0.8 && player.posz<=-17.2 && player.posz>=-18.8){
         state.finishedGame=1;
     }
+    if (state.finishedGame){
+        psychedelic(600/dt);
+    }
 }
 
 /*pomeranje levo-desno u odnosu na kameru*/
 static float* moveRightCam(void)
 {
-
     static float v[3];
     float ax=lookAtx-eyex;
     float ay=lookAty-eyey;
@@ -101,7 +102,6 @@ static float* moveRightCam(void)
 /*pomeranje napred-nazad u odnosu na  kameru*/
 static float* moveForwardCam(int yZero)
 {
-
     static float v[3];
     v[0]=lookAtx-eyex;
     v[1]=yZero!=0 ? 0 :lookAty-eyey;
@@ -139,6 +139,7 @@ void firePaint()
             break;
         }
     }
+    state.newGame=0;
 }
 /*bullets[i].vx.goal koristim kao brojac duzine zivota metaka
 nakon max_bullet_life nestane.*/

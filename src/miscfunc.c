@@ -1,6 +1,7 @@
 
 #include "miscfunc.h"
-int animationOngoing=1;
+int showFps=0;
+
 static int isequal(float a, float b);
 /*funkcija linearne interpolacije. sluzi da se postepeno menja vrednost*/
 float approach(float goal, float curr, float dt)
@@ -25,7 +26,7 @@ void normalize3f(float* x, float* y, float* z)
 
 void setColor(Object* op, float r, float g, float b)
 {
-    
+
     op->color[0]=r;
     op->color[1]=g;
     op->color[2]=b;
@@ -69,9 +70,10 @@ Color getColor(Object o)
     return OTHER;
 }
 /*zbog reprezentacije float-a cesto ne budu jednaki kada poredim*/
+const float eps=0.01;
 int isequal(float a, float b)
 {
-    if (fabsf(a-b)<0.01)
+    if (fabsf(a-b)<eps)
         return 1;
     return 0;
 }
@@ -84,17 +86,11 @@ void resetGame(void)
     state=stateInit;
     player=playerInit;
     viewAzimuth.curr=270;
-    viewElevation.curr=-10;
+    viewElevation.curr=0;
     eyex=0, eyey=1, eyez=2;
     lookAtx=0, lookAty=0, lookAtz=0;
     upx=0, upy=1, upz=0;
     int i;
     for (i=0;i<MAX_LIGHTS; i++)
         lightOn[i]=0;
-}
-
-void freezeGame(void)
-{
-    animationOngoing=0;
-
 }

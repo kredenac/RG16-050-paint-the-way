@@ -15,7 +15,6 @@ void onTimerUpdate(int id);
 static void updateDeltaTime(void);
 static void fps(int print);
 
-/*TODO boje mogu da budu malo vise fun*/
 int main(int argc, char** argv)
 {
     glutInit(&argc,argv);
@@ -58,10 +57,10 @@ int main(int argc, char** argv)
 void onDisplay(void)
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    fps(0);
-    positionCam();
+    fps(showFps);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
+    positionCam();
 
     lightSetup();
     materialSetup();
@@ -72,6 +71,7 @@ void onDisplay(void)
     glutSwapBuffers();
 }
 
+/*funkcija za azuriranje polozaja objekata*/
 void onTimerUpdate(int id)
 {
     if (TIMER_UPDATE_ID!=id){
@@ -82,6 +82,7 @@ void onTimerUpdate(int id)
     playerCollision();
     bulletCollision();
     moveBullets();
+    checkEvents();
 
     glutPostRedisplay();
     glutTimerFunc(UPDATE_TIMER_INTVAL, onTimerUpdate, TIMER_UPDATE_ID);

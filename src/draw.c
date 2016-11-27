@@ -1,6 +1,4 @@
 #include "draw.h"
-float light_position[] = { 0, -1, 0, 1 };
-float light_direction[] = { 0, -1, 0};
 int paintedLightIsOn;
 
 /******************/
@@ -54,7 +52,7 @@ void addBlocks(float begx, float endx, float begy, float endy, float begz, float
 int lightOn[MAX_LIGHTS];
 int lights[]={GL_LIGHT0,GL_LIGHT1,GL_LIGHT2,GL_LIGHT3,
     GL_LIGHT4,GL_LIGHT5,GL_LIGHT6,GL_LIGHT7};
-
+float lightPos[MAX_LIGHTS][4];
 void lightSetup()
 {
     glEnable(GL_LIGHTING);
@@ -62,6 +60,7 @@ void lightSetup()
     for (i=0; i<MAX_LIGHTS; i++){
         if (lightOn[i]){
             glEnable(lights[i]);
+            glLightfv(lights[i], GL_POSITION, lightPos[i]);
         }else{
             glDisable(lights[i]);
         }
@@ -69,15 +68,16 @@ void lightSetup()
 }
 void initLights()
 {
-    float light_ambient[] = { 0.3, 0.3, 0.3, 1};
-    float light_diffuse[] = { 0.7, 0.7, 0.7, 1 };
-    float light_specular[] = { 0.2, 0.2, 0.2, 0.1 };
+    float lightAmbient[] = { 0.3, 0.3, 0.3, 1};
+    float lightDiffuse[] = { 0.7, 0.7, 0.7, 1 };
+    float lightSpecular[] = { 0.2, 0.2, 0.2, 0.0 };//0.1
+    float lightDirection[] = { 0, 0, 0};
     int i;
     for (i=0; i<MAX_LIGHTS; i++){
-        glLightfv(lights[i], GL_SPOT_DIRECTION, light_direction);
-        glLightfv(lights[i], GL_AMBIENT, light_ambient);
-        glLightfv(lights[i], GL_DIFFUSE, light_diffuse);
-        glLightfv(lights[i], GL_SPECULAR, light_specular);
+        glLightfv(lights[i], GL_SPOT_DIRECTION, lightDirection);
+        glLightfv(lights[i], GL_AMBIENT, lightAmbient);
+        glLightfv(lights[i], GL_DIFFUSE, lightDiffuse);
+        glLightfv(lights[i], GL_SPECULAR, lightSpecular);
         /*opadanje intenziteta svetlosti u zavisnosti od razdaljine*/
         glLightf(lights[i], GL_CONSTANT_ATTENUATION, 0);
         glLightf(lights[i], GL_LINEAR_ATTENUATION, 0.3);
@@ -88,12 +88,11 @@ void initLights()
 
 void setLightPos(int n, float x, float y, float z)
 {
-    float light_position[4];
-    light_position[0] =x;
-    light_position[1] =y;
-    light_position[2] =z;
-    light_position[3] =1;
-    glLightfv(lights[n], GL_POSITION, light_position);
+    lightPos[n][0] = x;
+    lightPos[n][1] = y;
+    lightPos[n][2] = z;
+    lightPos[n][3] = 1;
+    //glLightfv(lights[n], GL_POSITION, light_position);
 }
 
 void materialSetup()
@@ -104,8 +103,8 @@ void materialSetup()
     /* Koeficijenti difuzne refleksije materijala. */
     GLfloat diffuse_coeffs[] = { 0.4, 0.4, 0.4, 1 };
     /* Koeficijenti spekularne refleksije materijala. */
-    GLfloat specular_coeffs[] = { 1, 1, 1, 1 };
-    GLfloat shininess = 20;
+    GLfloat specular_coeffs[] = { 0, 0, 0, 1 };
+    GLfloat shininess = 0;//20
 
     glMaterialfv(GL_FRONT, GL_AMBIENT, ambient_coeffs);
     glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_coeffs);
@@ -115,19 +114,19 @@ void materialSetup()
 
 void drawWithColor(Object o)
 {
-    GLfloat diffuse_coeffs[] = {o.color[0], o.color[1], o.color[2], 1 };
-    /*potamnjuje ambinet ceffs*/
+    GLfloat diffuseCoeffs[] = {o.color[0], o.color[1], o.color[2], 1 };
+    /*potamnjuje ambinet coeffs*/
     float s=0;//0.3;
-    GLfloat ambient_coeffs[] = {o.color[0]*s, o.color[1]*s, o.color[2]*s, 1 };
-    GLfloat emission_coeffs[] = { 0.5, 0.5, 0.5, 1 };
-    GLfloat emission_coeffs2[] = { 0, 0, 0, 0 };
+    GLfloat ambientCoeffs[] = {o.color[0]*s, o.color[1]*s, o.color[2]*s, 1 };
+    GLfloat emissionCoeffs[] = { 0.5, 0.5, 0.5, 1 };
+    GLfloat emissionCoeffs2[] = { 0, 0, 0, 0 };
     if (getColor(o)==WHITE){
-        glMaterialfv(GL_FRONT, GL_EMISSION, emission_coeffs);
+        glMaterialfv(GL_FRONT, GL_EMISSION, emissionCoeffs);
     }else{
-        glMaterialfv(GL_FRONT, GL_EMISSION, emission_coeffs2);
+        glMaterialfv(GL_FRONT, GL_EMISSION, emissionCoeffs2);
     }
-    glMaterialfv(GL_FRONT, GL_AMBIENT, ambient_coeffs);
-    glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_coeffs);
+    glMaterialfv(GL_FRONT, GL_AMBIENT, ambientCoeffs);
+    glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuseCoeffs);
 }
 
 /*postavlja kameru na poziciju glave igraca i usmerava pogled*/
@@ -156,9 +155,6 @@ void positionCam(void)
 
 void map()
 {
-    if (state.finishedGame){
-        psychedelic(60);
-    }
     int i;
     for (i=0;i<NUM_BLOCKS;i++){
         drawCube(*blocks[i]);
@@ -174,8 +170,8 @@ void psychedelic(int interval)
     c=0;
     int i;
     /*poput gradijenta-pocetni se boje pretezno start bojom, a poslednji end bojom*/
-    float start[]={(float)rand()/(float)(RAND_MAX), (float)rand()/(float)(RAND_MAX), (float)rand()/(float)(RAND_MAX)};
-    float end[]={(float)rand()/(float)(RAND_MAX), (float)rand()/(float)(RAND_MAX), (float)rand()/(float)(RAND_MAX)};
+    float start[]={rand()/(float)(RAND_MAX), rand()/(float)(RAND_MAX), rand()/(float)(RAND_MAX)};
+    float end[]={rand()/(float)(RAND_MAX), rand()/(float)(RAND_MAX), rand()/(float)(RAND_MAX)};
     /*ipak, nece biti cist gradijent nego odstupanja. nice je deo boje od gradijenta, a displace deo od rand odstupanja*/
     float nice=0.8;
     float displace=1-nice;
@@ -188,9 +184,9 @@ void psychedelic(int interval)
             r=start[0]*s + end[0]*e;
             g=start[1]*s + end[1]*e;
             b=start[2]*s + end[2]*e;
-            r=r*nice + displace*(float)rand()/(float)(RAND_MAX);
-            g=g*nice + displace*(float)rand()/(float)(RAND_MAX);
-            b=b*nice + displace*(float)rand()/(float)(RAND_MAX);
+            r=r*nice + displace*rand()/(float)(RAND_MAX);
+            g=g*nice + displace*rand()/(float)(RAND_MAX);
+            b=b*nice + displace*rand()/(float)(RAND_MAX);
             setColor(blocks[i],r,g,b);
         }
     }
@@ -232,6 +228,11 @@ void initCubes()
 
     /*narandzasta platforma*/
     addBlocks(-4,4,1,1,-6,-13);
+    /*stubovi*/
+    addBlocks(-3,-3,2,4,-11,-11);
+    addBlocks(3,3,2,4,-11,-11);
+    addBlocks(-3,-3,2,4,-7,-7);
+    addBlocks(3,3,2,4,-7,-7);
     /*help da se vratim*/
     addBlocks(-4,4,-1,-1,-14,-14);
     /*da ne bude rupa*/

@@ -39,6 +39,7 @@ typedef struct{
     int bigJump;
     int goFast;
     int finishedGame;
+    int newGame;
 }State;
 
 
@@ -55,6 +56,7 @@ extern void resetBullets(void);
 extern void moveBullets(void);
 extern void positionCam(void);
 extern void onKeyHold(void);
+extern void checkEvents(void);
 extern Object player;
 
 extern float lastPosx, lastPosz, lastPosy;

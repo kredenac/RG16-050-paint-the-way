@@ -8,8 +8,6 @@
 
 extern int NUM_BLOCKS;
 extern Object* blocks[];
-extern float light_position[];
-extern float light_direction[];
 extern int lightOn[];
 #define MAX_LIGHTS 8
 

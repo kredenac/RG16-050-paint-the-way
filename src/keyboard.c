@@ -1,19 +1,23 @@
 #include "keyboard.h"
 
+#define ESC 27
 static int KEY_W=0;
 static int KEY_S=0;
 static int KEY_A=0;
 static int KEY_D=0;
+static int fullScreen=0;
 float initWindowHeight=800;
 static float viewAzimuthdt=15, viewElevationdt=5;
 float aspectRatio=16/9.0;
 
-void onMouseButton(int button, int state, int x, int y)
+void onMouseButton(int button, int pressed, int x, int y)
 {
     if (button == GLUT_LEFT_BUTTON) {
 
-		if (state == GLUT_DOWN) {
+		if (pressed == GLUT_DOWN) {
 			firePaint();
+
+
 		}
 	}
 }
@@ -42,6 +46,7 @@ void onMouseLook(int x, int y)
         deltaY = y - height/2;
         glutWarpPointer(width/2, height/2);
     }
+    if (state.newGame) return;
     prev_mouse_X=x;
     prev_mouse_Y=y;
     // printf("deltax: %f, deltay: %f\n",deltaX,deltaY);
@@ -86,6 +91,8 @@ void onKeyHold()
 /*ne treba mi vise al nek stoji za ukras*/
 void onSpecialInputUp(int key, int x, int y)
 {
+    if (state.newGame) return;
+
     switch(key)
     {
         default:
@@ -95,6 +102,8 @@ void onSpecialInputUp(int key, int x, int y)
 
 void onSpecialInput(int key, int x, int y)
 {
+    if (state.newGame) return;
+
     switch(key)
     {
         case (GLUT_KEY_RIGHT):
@@ -120,18 +129,22 @@ void onKeyboardUp(unsigned char key, int x, int y)
 {
     switch(key){
         case('a'):
+        case('A'):
             KEY_A=0;
             player.vx.goal=0;
             break;
         case('d'):
+        case('D'):
             KEY_D=0;
             player.vx.goal=0;
             break;
         case('w'):
+        case('W'):
             KEY_W=0;
             player.vz.goal=0;
             break;
         case('s'):
+        case('S'):
             KEY_S=0;
             player.vz.goal=0;
             break;
@@ -140,9 +153,12 @@ void onKeyboardUp(unsigned char key, int x, int y)
 
 void onKeyboard(unsigned char key, int x, int y)
 {
-
+    /*na samom pocetku blokira se input dok igrac ne ispali boju*/
+    if (state.newGame && key!='f' && key!='F' && key!='r' && key!='R' && key!=ESC)
+        return;
     switch(key){
         case('f'):
+        case('F'):
             firePaint();
             break;
         case(' '):
@@ -153,22 +169,28 @@ void onKeyboard(unsigned char key, int x, int y)
             }
             break;
         case('s'):
+        case('S'):
             KEY_S=1;
             player.vz.goal=-0.05-state.goFast*0.15;
             break;
         case('w'):
+        case('W'):
             KEY_W=1;
             player.vz.goal=0.05+state.goFast*0.15;
             break;
         case('a'):
+        case('A'):
             KEY_A=1;
             player.vx.goal=-0.05-state.goFast*0.15;
             break;
         case('d'):
+        case('D'):
             KEY_D=1;
             player.vx.goal=0.05+state.goFast*0.15;
             break;
         case('r'):
+        case('R'):
+            fullScreen=1;
             resetGame();
             glutFullScreen();
             break;
@@ -183,6 +205,10 @@ void onKeyboard(unsigned char key, int x, int y)
             break;
         case ('4'):
             printf("%f, %f, %f\n",player.posx,player.posy,player.posz);
+            showFps=!showFps;
+            break;
+        case ('0'):
+            player.posy=11.8, player.posx=0, player.posz=-18;
             break;
         case('p'):
             if (!releaseMouse){
@@ -193,7 +219,7 @@ void onKeyboard(unsigned char key, int x, int y)
                 releaseMouse=0;
             }
             break;
-        case(27):
+        case(ESC):
             exit(0);
             break;
     }
@@ -202,8 +228,10 @@ void onKeyboard(unsigned char key, int x, int y)
 
 void onReshape(int width, int height)
 {
-    width=aspectRatio*height;
-    glutReshapeWindow(width, height);
+    if (!fullScreen){
+        width=aspectRatio*height;
+        glutReshapeWindow(width, height);
+    }
     glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
