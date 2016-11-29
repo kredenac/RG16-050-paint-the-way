@@ -11,8 +11,10 @@ extern Object* blocks[];
 extern int lightOn[];
 #define MAX_LIGHTS 8
 
-extern void drawCube(Object o);
-extern void drawWithColor(Object o);
+extern void addBlocks(float begx, float endx, float begy, float endy, float begz, float endz);
+extern void setSizes(float x, float y, float z);
+extern void drawCube(Object* o);
+extern void drawWithColor(Object* o);
 extern void drawBullets(void);
 extern void map(void);
 extern void initCubes(void);

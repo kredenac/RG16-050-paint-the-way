@@ -20,7 +20,7 @@ int main(int argc, char** argv)
     glutInit(&argc,argv);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 
-    glutInitWindowSize(aspectRatio*initWindowHeight,initWindowHeight);
+    glutInitWindowSize(aspectRatio * initWindowHeight, initWindowHeight);
     glutInitWindowPosition(0,0);
     glutCreateWindow("Paint the Way");
     glutDisplayFunc(onDisplay);
@@ -38,7 +38,7 @@ int main(int argc, char** argv)
     glEnable(GL_NORMALIZE);
     glutSetCursor(GLUT_CURSOR_NONE);
     glutIgnoreKeyRepeat(GL_TRUE);
-
+    loadBlocks();
     glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);
 	glDepthFunc(GL_LEQUAL);
@@ -49,7 +49,7 @@ int main(int argc, char** argv)
     resetGame();
     dt=glutGet(GLUT_ELAPSED_TIME);
     srand(time(NULL));
-    glutTimerFunc(UPDATE_TIMER_INTVAL, onTimerUpdate,TIMER_UPDATE_ID);
+    glutTimerFunc(UPDATE_TIMER_INTERVAL, onTimerUpdate,TIMER_UPDATE_ID);
     glutMainLoop();
     return 0;
 }
@@ -74,7 +74,7 @@ void onDisplay(void)
 /*funkcija za azuriranje polozaja objekata*/
 void onTimerUpdate(int id)
 {
-    if (TIMER_UPDATE_ID!=id){
+    if (TIMER_UPDATE_ID != id){
         return;
     }
     updateDeltaTime();
@@ -85,20 +85,20 @@ void onTimerUpdate(int id)
     checkEvents();
 
     glutPostRedisplay();
-    glutTimerFunc(UPDATE_TIMER_INTVAL, onTimerUpdate, TIMER_UPDATE_ID);
+    glutTimerFunc(UPDATE_TIMER_INTERVAL, onTimerUpdate, TIMER_UPDATE_ID);
 }
 
 #define DT_MAX 60
 static int newTime;
-static int oldTime=0;
-static int timeSum=0;
+static int oldTime = 0;
+static int timeSum = 0;
 /*racunanje dt-vremena izmedju 2 poziva onTimerUpdate funkcije*/
 void updateDeltaTime(void)
 {
     newTime=glutGet(GLUT_ELAPSED_TIME);
-    dt=newTime-oldTime;
-    oldTime=newTime;
-    timeSum+=dt;
+    dt = newTime - oldTime;
+    oldTime = newTime;
+    timeSum += dt;
     if (dt>DT_MAX)
         dt=DT_MAX;
     //printf("dt=%d\n",dt);
@@ -107,11 +107,11 @@ void updateDeltaTime(void)
 /*racuna frames per second*/
 void fps(int print)
 {
-    static int frame=0;
+    static int frame = 0;
     frame++;
-    if (print && timeSum>=1000){
+    if (print && timeSum >= 1000){
         printf("fps:%f\n",frame*1000/(float)timeSum);
-        timeSum=0;
-        frame=0;
+        timeSum = 0;
+        frame = 0;
     }
 }

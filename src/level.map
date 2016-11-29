@@ -1,0 +1,74 @@
+s 2 2 2
+#pocetne kocke u centru
+-1 -1 0 0 0 0
+1 1 0 0 0 0
+0 0 -1 -1 0 0
+0 0 1 1 0 0
+0 0 0 0 -1 -1
+0 0 -1 -1 1 1
+0 0 -1.2 -1.2 2 2
+-1 -1 -1 -1 1 1
+1 1 -1 -1 1 1
+s 0.5 0.5 0.5
+0 0 0 0 0 0
+#veliki levi i desni zidovi
+s 2 4 4
+-5 -5 0.5 9 5 -25
+5 5 0.5 9 5 -25
+#veliki napred
+s 4 4 2
+-4 4 0.5 9 -26 -26
+#veliki iza
+s 4 4 4
+-4 4 0.5 9 6.5 6.5
+s 2 2 2
+#2 rupe ispod
+-1 1 -2 -2 2 2
+#iza starta ploce
+-4 4 -1 -1 3 5
+#sa leve i desne strane starta
+-4 -2 -1 -1 0 2
+4 2 -1 -1 0 2
+#platforma koja se boji u plavo
+-4 4 -1 -1 -1 -5
+#zid izmedju plave i narandzaste
+-4 4 0 0 -6 -6
+#narandzasta platforma
+-4 4 1 1 -6 -13
+#stubovi
+-3 -3 2 4 -11 -11
+3 3 2 4 -11 -11
+-3 -3 2 4 -7 -7
+3 3 2 4 -7 -7
+#help da se vratim
+-4 4 -1 -1 -14 -14
+#da ne bude rupa
+-4 4 0 0 -13 -13
+-5 -5 -1 -1 -15 -20
+5 5 -1 -1 -15 -20
+#landing nakon sprinta
+-2 2 1 1 -18 -18
+-2 2 2 2 -21 -19
+#da se vratim kad padnem sa sprinta
+-4 4 -2 -2 -15 -20
+#zid od dole do landinga
+s 4 4 2
+-4 4 -1 1 -21 -21
+s 2 2 2
+#platforma koja se boji u plavo i narandzasto
+-4 4 2 2 -22 -25
+#landing na poslednju plat
+-1 1 4.0625 4.125 -14 -14
+s 2 0.25 2
+-1 1 4.625 4.625 -13 -13.5
+-1 1 4.75 4.75 -12.5 -13
+-1 1 4.875 4.875 -12 -12.5
+-1 1 5 5 -11.5 -12
+s 2 2 2
+#finish
+-3 3 5 5 -7 -11
+#border
+-1 1 6 6 -10 -10
+-1 -1 6 6 -9 -9
+1 1 6 6 -9 -9
+0 0 5.7 5.7 -8 -8
