@@ -44,8 +44,11 @@ void set3fWithColor(Color c, float* r1, float* g1, float* b1)
     case (ORANGE):
         r = 1, g = 0.3, b = 0.1;
         break;
+    case (BLACK):
+        r=0, g=0, b=0;
+        break;
     default:
-        r = 1, g = 1, b = 1;
+        r = 1, g = 0.7, b =0.7 ;
         break;
     }
     *r1 = r, *g1 = g, *b1 = b;
@@ -64,12 +67,15 @@ Color getColor(Object* o)
         return BLUE;
     } else if (isequal(col[0], 1) && isequal(col[1], 0.3) && isequal(col[2], 0.1)) {
         return ORANGE;
+    } else if (isequal(col[0], 0) && isequal(col[1], 0) && isequal(col[2], 0)){
+        return BLACK;
     }
 
     return OTHER;
 }
 
-/*zbog reprezentacije float-a cesto ne budu jednaki kada ih poredim*/
+/*zbog reprezentacije float-a cesto ne budu jednaki kada ih poredim bez castovanja*/
+/*takodje sluzi ako ne insistiram da boje moraju biti bas identicne*/
 const float eps = 0.01;
 
 int isequal(float a, float b)

@@ -19,6 +19,16 @@ void onMouseButton(int button, int pressed, int x, int y)
 
         }
     }
+    if (button == GLUT_RIGHT_BUTTON) {
+
+        if (pressed == GLUT_DOWN && state.buildMode) {
+            /****************new*********************/
+            Color last=state.fireColor;
+            state.fireColor=BLACK;
+            firePaint();
+            state.fireColor=last;
+        }
+    }
 }
 
 static float prevMouseX = 500;
@@ -209,6 +219,10 @@ void onKeyboard(unsigned char key, int x, int y)
     case ('4'):
         printf("%f, %f, %f\n", player.posx, player.posy, player.posz);
         showFps = !showFps;
+        break;
+    case ('5'):
+        printf("build mode:\n");
+        state.buildMode=!state.buildMode;
         break;
     case ('0'):
         player.posy = 11.8, player.posx = 0, player.posz = -18;

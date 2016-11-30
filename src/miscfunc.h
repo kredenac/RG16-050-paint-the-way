@@ -6,6 +6,7 @@
 #include <GL/glut.h>
 #include "player.h"
 #include "draw.h"
+#include "blocks.h"
 #define TIMER_UPDATE_ID 1
 #define UPDATE_TIMER_INTERVAL 10
 #define UPDATE_INTERVAL 17

@@ -8,7 +8,7 @@
 #include "miscfunc.h"
 #include "collision.h"
 #include "draw.h"
-
+#include "blocks.h"
 static void onDisplay(void);
 int dt;
 void onTimerUpdate(int id);

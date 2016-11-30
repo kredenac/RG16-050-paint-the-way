@@ -7,6 +7,7 @@ typedef enum {
     WHITE,
     BLUE,
     ORANGE,
+    BLACK,
     OTHER
 }Color;
 
@@ -40,6 +41,7 @@ typedef struct{
     int goFast;
     int finishedGame;
     int newGame;
+    int buildMode;
 }State;
 
 

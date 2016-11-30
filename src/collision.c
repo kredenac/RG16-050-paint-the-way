@@ -60,14 +60,22 @@ int aIsInb(Object a, Object b)
 static float kneeHeight = 0.25;
 int isAbove(Object a, Object b)
 {
-    return lastPosy - kneeHeight > b.posy + b.height / 2;
+    float y=a.posy-a.vy.curr;
+    /*ako je isti width kao player smatram da je to bas on*/
+    float offset=(a.width==player.width) ? kneeHeight : 0;
+    return y - offset > b.posy + b.height / 2;
+    // return lastPosy - kneeHeight > b.posy + b.height / 2;
 }
 
 int isBelow(Object a, Object b)
 {
     if (!aIsInb(a, b))
         return 0;
-    return lastPosy - playerHeadHeight + player.height / 2 < b.posy - b.height / 2;
+    float y=a.posy-a.vy.curr;
+    /*ako je isti width kao player smatram da je to bas on*/
+    float offset=(a.width==player.width) ? playerHeadHeight : 0;
+    return y - offset+ a.height / 2 < b.posy - b.height / 2;
+    // return lastPosy - playerHeadHeight + player.height / 2 < b.posy - b.height / 2;
 }
 
 /*kada ima kolizije da se odluci sa koje strane b je*/
@@ -75,7 +83,8 @@ Side aRelativeTob(Object a, Object b)
 {
     Side x, z;
     float ax, az, leftx, rightx, frontz, backz;
-    ax = lastPosx, az = lastPosz;
+    ax = a.posx-a.vx.curr;
+    az = a.posz-a.vz.curr;
     leftx = b.posx - b.length / 2 - a.length / 2;
     rightx = b.posx + b.length / 2 + a.length / 2;
     /*da li je blizi levoj ili desnoj strani*/
@@ -108,11 +117,13 @@ void playerCollision(void)
 {
     /*postavlja se jumping na 1, pa ako stoji na necemu bice 0*/
     state.jumping = 1;
-    int i;
     Side side;
     Object p;
-    for (i = 0; i < NUM_BLOCKS; i++) {
-        p = *blocks[i];
+    /**************************new*******************************/
+    ObjectNode* l;
+    for (l=Blocks; l!=NULL; l=l->next){
+        p=*(l->o);
+        /*copy pasta*/
         if (hasCollision(player, p)) {
             /*kolizija sa podom*/
             if (isAbove(player, p)) {
@@ -133,7 +144,9 @@ void playerCollision(void)
                         state.bigJump = 0;
                         break;
                     case (WHITE):
+                    case (BLACK):
                     case (OTHER):
+                    default:
                         state.bigJump = 0;
                         state.goFast = 0;
                         break;
@@ -168,21 +181,64 @@ void playerCollision(void)
             }
         }
     }
+
+    /************************************************************/
 }
 
 /*prodji kroz sve slotove, ako je aktivan metak proveri koliziju sa kockama*/
 void bulletCollision(void)
 {
-    int i, j;
+    int i;
     for (i = 0; i < MAX_BULLETS; i++) {
         if (bullets_active[i]) {
-            for (j = 0; j < NUM_BLOCKS; j++) {
-                if (hasCollision(*blocks[j], bullets[i])) {
+
+            /******************************new***********************/
+            ObjectNode* l;
+            for (l=Blocks; l!=NULL; l=l->next){
+                Object p=*(l->o);
+
+                if (hasCollision(p, bullets[i])) {
                     bullets_active[i] = 0;
-                    paintBlock(blocks[j], & bullets[i]);
+                    paintBlock(l->o, &bullets[i]);
+                    /*********************new***************/
+                    if (state.buildMode){
+                        Object o=p;//sredi vars
+                        /*ako je blok pogodjen crnom bojom onda se brise*/
+                        if (getColor(&bullets[i])==BLACK){
+                            removeNode(&Blocks, l);
+                            printf("removed block\n");
+                        }else if (isAbove(bullets[i],o)){
+                            addToList(&Blocks,o.posx, o.posy+o.height, o.posz);
+                        }else if (isBelow(bullets[i],o)){
+                            addToList(&Blocks,o.posx, o.posy-o.height, o.posz);
+                        }else{
+                            Side side = aRelativeTob(bullets[i], o);
+                            float x=o.posx,y=o.posy,z=o.posz;
+                            switch (side) {
+                            case FRONT:
+                                z+=o.width;
+                                break;
+                            case BACK:
+                                z-=o.width;
+                                break;
+                            case LEFT:
+                                x-=o.length;
+                                break;
+                            case RIGHT:
+                                x+=o.length;
+                                break;
+                            default:
+                                break;
+                        }
+
+                        addToList(&Blocks, x, y, z);
+                        }
+                    }
+                    /**************************************/
                     break;
                 }
             }
+            /***********************************************************/
         }
     }
 }

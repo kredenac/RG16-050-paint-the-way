@@ -5,7 +5,7 @@
 #include "player.h"
 #include "miscfunc.h"
 #include "draw.h"//
-
+#include "blocks.h"
 typedef enum {
     TOP,
     BOT,

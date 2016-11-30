@@ -1,57 +1,6 @@
 #include "draw.h"
 
-static const float scale = 2;
-static float sizex, sizey, sizez;
-void setSizes(float x, float y, float z)
-{
-    sizex = x;
-    sizey = y;
-    sizez = z;
-}
 
-Object* createBlock()
-{
-    Object* novi = (Object* ) malloc(sizeof(Object));
-    if (novi == NULL)
-        return NULL;
-    novi->length = sizex;
-    novi->height = sizey;
-    novi->width = sizez;
-
-    novi->color[0] = (float) rand() / (float)(RAND_MAX);
-    novi->color[1] = (float) rand() / (float)(RAND_MAX);
-    novi->color[2] = (float) rand() / (float)(RAND_MAX);
-    return novi;
-}
-
-int NUM_BLOCKS = 0;
-Object* blocks[1000];
-
-#define SWAP(x, y, T) do {T SWAP = x; x = y; y = SWAP;} while (0)
-
-void addBlocks(float begx, float endx, float begy, float endy, float begz, float endz)
-{
-    if (begx > endx) SWAP(begx, endx, float);
-    if (begy > endy) SWAP(begy, endy, float);
-    if (begz > endz) SWAP(begz, endz, float);
-    int count = 0;
-    begx *= scale, endx *= scale, begy *= scale;
-    endy *= scale, begz *= scale, endz *= scale;
-    float x, y, z;
-    for (x = begx; x <= endx; x += sizex) {
-        for (y = begy; y <= endy; y += sizey) {
-            for (z = begz; z <= endz; z += sizez) {
-                blocks[NUM_BLOCKS] = createBlock();
-                blocks[NUM_BLOCKS]->posx = x;
-                blocks[NUM_BLOCKS]->posy = y;
-                blocks[NUM_BLOCKS]->posz = z;
-                NUM_BLOCKS++;
-                count++;
-            }
-        }
-    }
-    //printf("novi blokovi:%d ukupno:%d\n",count,NUM_BLOCKS);
-}
 
 int lightOn[MAX_LIGHTS];
 int lights[] = {
@@ -167,9 +116,9 @@ void positionCam(void)
 
 void map()
 {
-    int i;
-    for (i = 0; i < NUM_BLOCKS; i++) {
-        drawCube(blocks[i]);
+    ObjectNode* l;
+    for (l=Blocks; l!=NULL; l=l->next){
+        drawCube(l->o);
     }
 }
 
@@ -199,30 +148,26 @@ void psychedelic(int interval)
     float displace = 1 - nice;
     float r, g, b;
     /*s je deo start boje, a e je deo end boje*/
-    for (i = 0; i < NUM_BLOCKS; i++) {
-        float e = (float) i / NUM_BLOCKS;
+    /*************************new************************************/
+    ObjectNode* l;
+    i=0;
+    for (l=Blocks; l!=NULL; l=l->next, i++){
+
+        float e = (float) i / NUM_OF_BLOCKS;
         float s = 1 - e;
-        if (getColor(blocks[i]) != WHITE) {
+        if (getColor(l->o) != WHITE) {
             r = start[0] * s + end[0] * e;
             g = start[1] * s + end[1] * e;
             b = start[2] * s + end[2] * e;
             r = r * nice + displace * rand() / (float)(RAND_MAX);
             g = g * nice + displace * rand() / (float)(RAND_MAX);
             b = b * nice + displace * rand() / (float)(RAND_MAX);
-            setColor(blocks[i], r, g, b);
+            setColor(l->o, r, g, b);
         }
     }
+    /****************************************************************/
 }
 
-void initCubes()
-{
-    int i;
-    for (i = 0; i < NUM_BLOCKS; i++) {
-        free(blocks[i]);
-    }
-    NUM_BLOCKS = 0;
-    loadBlocks();
-}
 
 void drawBullets(void) {
     float x, y, z;

@@ -31,7 +31,8 @@ const State stateInit = {
     .bigJump = 0,
     .goFast = 0,
     .finishedGame = 0,
-    .newGame = 1
+    .newGame = 1,
+    .buildMode=0
 };
 
 Object player;
@@ -141,8 +142,8 @@ void firePaint()
                 bullets[i].posy = player.posy;
                 bullets[i].posz = player.posz;
                 /*postavljanje boje metka na osnovu izabrane*/
-                set3fWithColor(state.fireColor, & r, & g, & b);
-                setColor( & bullets[i], r, g, b);
+                set3fWithColor(state.fireColor, &r, &g, &b);
+                setColor(&bullets[i], r, g, b);
                 /*postavljanje vektora brzine metka na tacku gde igrac gleda*/
                 float* v = moveForwardCam(0);
                 bullets[i].vx.curr = v[0] / BULLET_SPEED;
