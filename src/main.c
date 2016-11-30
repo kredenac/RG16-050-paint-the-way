@@ -11,6 +11,7 @@
 #include "blocks.h"
 static void onDisplay(void);
 int dt;
+static int staroTime;
 void onTimerUpdate(int id);
 static void updateDeltaTime(void);
 static void fps(int print);
@@ -47,7 +48,7 @@ int main(int argc, char** argv)
     glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
     glClearColor(0, 0, 0, 0);
     resetGame();
-    dt=glutGet(GLUT_ELAPSED_TIME);
+    staroTime=dt=glutGet(GLUT_ELAPSED_TIME);
     srand(time(NULL));
     glutTimerFunc(UPDATE_TIMER_INTERVAL, onTimerUpdate,TIMER_UPDATE_ID);
     glutMainLoop();
@@ -105,13 +106,25 @@ void updateDeltaTime(void)
 }
 
 /*racuna frames per second*/
+static int novoTime;
+
+#define SECOND 1000
 void fps(int print)
 {
+    novoTime=glutGet(GLUT_ELAPSED_TIME);
+    int diff=novoTime-staroTime;
+    staroTime=novoTime;
+    /*max i min vreme izmedju 2 frejma*/
+    static int maxTime=0,minTime=SECOND;
+    maxTime = diff>maxTime ? diff : maxTime;
+    minTime = diff<minTime ? diff : minTime;
     static int frame = 0;
     frame++;
     if (print && timeSum >= 1000){
-        printf("fps:%f\n",frame*1000/(float)timeSum);
+        printf("fps:%f minTime=%d maxTime=%d\n",frame*1000/(float)timeSum,minTime,maxTime);
         timeSum = 0;
         frame = 0;
+        maxTime=0;
+        minTime=SECOND;
     }
 }

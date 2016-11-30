@@ -12,21 +12,18 @@ float aspectRatio = 16 / 9.0;
 
 void onMouseButton(int button, int pressed, int x, int y)
 {
+    //printf("pokusavam brt\n");
     if (button == GLUT_LEFT_BUTTON) {
 
         if (pressed == GLUT_DOWN) {
             firePaint();
-
         }
     }
     if (button == GLUT_RIGHT_BUTTON) {
 
         if (pressed == GLUT_DOWN && state.buildMode) {
             /****************new*********************/
-            Color last=state.fireColor;
-            state.fireColor=BLACK;
-            firePaint();
-            state.fireColor=last;
+            fireBlackPaint();
         }
     }
 }
@@ -175,11 +172,7 @@ void onKeyboard(unsigned char key, int x, int y)
         firePaint();
         break;
     case (' '):
-        if (!state.jumping) {
-            player.vy.goal = JUMP_V + state.bigJump * 0.1;
-            state.bigJump = 0;
-            state.jumping = 1;
-        }
+        jump();
         break;
     case ('s'):
     case ('S'):
@@ -221,8 +214,7 @@ void onKeyboard(unsigned char key, int x, int y)
         showFps = !showFps;
         break;
     case ('5'):
-        printf("build mode:\n");
-        state.buildMode=!state.buildMode;
+        toggleBuildMode();
         break;
     case ('0'):
         player.posy = 11.8, player.posx = 0, player.posz = -18;
@@ -235,6 +227,9 @@ void onKeyboard(unsigned char key, int x, int y)
             glutSetCursor(GLUT_CURSOR_NONE);
             releaseMouse = 0;
         }
+        break;
+    case ('q'):
+        flyDown();
         break;
     case (ESC):
         exit(0);

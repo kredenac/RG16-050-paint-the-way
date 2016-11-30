@@ -27,12 +27,13 @@ const Object bulletInit = {
 State state;
 const State stateInit = {
     .jumping = 0,
-    .fireColor = 0,
+    .fireColor = WHITE,
     .bigJump = 0,
     .goFast = 0,
     .finishedGame = 0,
     .newGame = 1,
-    .buildMode=0
+    .buildMode=0,
+    .flying=0
 };
 
 Object player;
@@ -61,7 +62,7 @@ void movePlayer()
     /*ako je neko dugme pritisnuto azuriraj brzine*/
     onKeyHold();
     /*jedino ako je igrac u vazduhu ima razloga da ga teram dole*/
-    GRAVITY = state.jumping ? -1 : 0;
+    GRAVITY = (state.jumping && !state.flying) ? -1 : 0;
     /*vektori napred i desno relativno od kamere*/
     float* r = moveRightCam();
     float* f = moveForwardCam(1);
@@ -131,32 +132,35 @@ int bullets_active[MAX_BULLETS];
 #define BULLET_SPEED 5
 void firePaint()
 {
-        int i = 0;
-        float r, g, b;
-        for (i = 0; i < MAX_BULLETS; i++) {
-            /*u prvi neaktivan slot ubaci*/
-            if (!bullets_active[i]) {
-                bullets_active[i] = 1;
-                bullets[i] = bulletInit;
-                bullets[i].posx = player.posx;
-                bullets[i].posy = player.posy;
-                bullets[i].posz = player.posz;
-                /*postavljanje boje metka na osnovu izabrane*/
-                set3fWithColor(state.fireColor, &r, &g, &b);
-                setColor(&bullets[i], r, g, b);
-                /*postavljanje vektora brzine metka na tacku gde igrac gleda*/
-                float* v = moveForwardCam(0);
-                bullets[i].vx.curr = v[0] / BULLET_SPEED;
-                bullets[i].vy.curr = v[1] / BULLET_SPEED;
-                bullets[i].vz.curr = v[2] / BULLET_SPEED;
-                /*izlazi iz petlje jer je postavljen metak*/
-                break;
-            }
+    int i = 0;
+    float r, g, b;
+    for (i = 0; i < MAX_BULLETS; i++) {
+        /*u prvi neaktivan slot ubaci*/
+        if (!bullets_active[i]) {
+
+            bullets_active[i] = 1;
+            bullets[i] = bulletInit;
+            bullets[i].posx = player.posx;
+            bullets[i].posy = player.posy;
+            bullets[i].posz = player.posz;
+            /*postavljanje boje metka na osnovu izabrane*/
+            set3fWithColor(state.fireColor, &r, &g, &b);
+            setColor(&bullets[i], r, g, b);
+            //printf("pucam %d\n",state.fireColor);
+            /*postavljanje vektora brzine metka na tacku gde igrac gleda*/
+            float* v = moveForwardCam(0);
+            bullets[i].vx.curr = v[0] / BULLET_SPEED;
+            bullets[i].vy.curr = v[1] / BULLET_SPEED;
+            bullets[i].vz.curr = v[2] / BULLET_SPEED;
+            /*izlazi iz petlje jer je postavljen metak*/
+            break;
         }
-        state.newGame = 0;
     }
-    /*bullets[i].vx.goal koristim kao brojac duzine zivota metaka
-    nakon max_bullet_life nestane.*/
+
+    state.newGame = 0;
+}
+/*bullets[i].vx.goal koristim kao brojac duzine zivota metaka,
+nakon max_bullet_life nestane.*/
 static const float MAX_BULLET_LIFE = 1000;
 void moveBullets(void)
 {
@@ -228,4 +232,40 @@ int firstFreeLight(void)
     /*Block koji je bio najstariji prestaje da svetli*/
     setColor(lightBlock[oldestIndex], 0, 0, 0);
     return oldestIndex;
+}
+
+void jump(void)
+{
+    if (!state.jumping) {
+        player.vy.goal = JUMP_V + state.bigJump * 0.1;
+        state.bigJump = 0;
+        state.jumping = 1;
+    }else if(state.buildMode) {
+        state.flying=1;
+        player.vy.goal = JUMP_V + state.bigJump * 0.1;
+    }
+}
+
+void flyDown(void)
+{
+    if (state.buildMode && state.flying) {
+        player.vy.goal = -(JUMP_V + state.bigJump * 0.1);
+    }
+}
+
+void fireBlackPaint(void)
+{
+    Color last=state.fireColor;
+    state.fireColor=BLACK;
+    firePaint();
+    state.fireColor=last;
+}
+
+void toggleBuildMode(void)
+{
+    state.buildMode=!state.buildMode;
+    printf("%s build mode\n", state.buildMode? "Ukljucen" : "Iskljucen");
+    if (!state.buildMode){
+        state.flying=0;
+    }
 }

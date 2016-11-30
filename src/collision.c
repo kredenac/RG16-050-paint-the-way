@@ -131,6 +131,7 @@ void playerCollision(void)
                 if (aIsInb(player, p)) {
                     player.posy = p.posy + p.height / 2 + player.height / 2;
                     state.jumping = 0;
+                    state.flying = 0;
                     player.vy.curr = 0;
 
                     Color c = getColor( & p);

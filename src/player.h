@@ -42,6 +42,7 @@ typedef struct{
     int finishedGame;
     int newGame;
     int buildMode;
+    int flying;
 }State;
 
 
@@ -59,6 +60,11 @@ extern void moveBullets(void);
 extern void positionCam(void);
 extern void onKeyHold(void);
 extern void checkEvents(void);
+extern void jump(void);
+extern void fireBlackPaint(void);
+extern void flyDown(void);
+extern void toggleBuildMode(void);
+
 extern Object player;
 
 extern float lastPosx, lastPosz, lastPosy;
