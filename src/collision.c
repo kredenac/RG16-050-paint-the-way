@@ -1,11 +1,10 @@
 #include "collision.h"
 
-int rangeIntersect(float mina, float maxa, float minb, float maxb);
-int hasCollision(Object a, Object b);
-int isAbove(Object a, Object b);
-Side aRelativeTob(Object a, Object b);
-void playerCollision(void);
-void bulletCollision(void);
+static int rangeIntersect(float mina, float maxa, float minb, float maxb);
+static int hasCollision(Object* a, Object* b);
+static int isAbove(Object* ap, Object* bp);
+static Side aRelativeTob(Object* ap, Object* bp);
+static void bulletCollisionBuildMode(Object* bullet, ObjectNode* blockNode);
 
 int rangeIntersect(float mina, float maxa, float minb, float maxb)
 {
@@ -14,8 +13,9 @@ int rangeIntersect(float mina, float maxa, float minb, float maxb)
 
 /*proverava da li dva objekta imaju presek po svakoj osi,
  * ako imaju to je kolizija*/
-int hasCollision(Object a, Object b)
+int hasCollision(Object* ap, Object* bp)
 {
+    Object a = *ap, b = *bp;
     float mina, maxa, minb, maxb;
     mina = a.posx - a.length / 2;
     maxa = a.posx + a.length / 2;
@@ -39,8 +39,9 @@ int hasCollision(Object a, Object b)
 }
 
 /*da li se objekat a nalazi u objektu b, gledajuci samo xz ravan*/
-int aIsInb(Object a, Object b)
+int aIsInb(Object* ap, Object* bp)
 {
+    Object a = *ap, b = *bp;
     float mina, maxa, minb, maxb;
     mina = a.posx - a.length / 4;
     maxa = a.posx + a.length / 4;
@@ -58,8 +59,9 @@ int aIsInb(Object a, Object b)
 }
 
 static float kneeHeight = 0.25;
-int isAbove(Object a, Object b)
+int isAbove(Object* ap, Object* bp)
 {
+    Object a = *ap, b = *bp;
     float y=a.posy-a.vy.curr;
     /*ako je isti width kao player smatram da je to bas on*/
     float offset=(a.width==player.width) ? kneeHeight : 0;
@@ -67,9 +69,10 @@ int isAbove(Object a, Object b)
     // return lastPosy - kneeHeight > b.posy + b.height / 2;
 }
 
-int isBelow(Object a, Object b)
+int isBelow(Object* ap, Object* bp)
 {
-    if (!aIsInb(a, b))
+    Object a = *ap, b = *bp;
+    if (!aIsInb(ap, bp))
         return 0;
     float y=a.posy-a.vy.curr;
     /*ako je isti width kao player smatram da je to bas on*/
@@ -79,8 +82,9 @@ int isBelow(Object a, Object b)
 }
 
 /*kada ima kolizije da se odluci sa koje strane b je*/
-Side aRelativeTob(Object a, Object b)
+Side aRelativeTob(Object* ap, Object* bp)
 {
+    Object a = *ap, b = *bp;
     Side x, z;
     float ax, az, leftx, rightx, frontz, backz;
     ax = a.posx-a.vx.curr;
@@ -117,44 +121,18 @@ void playerCollision(void)
 {
     /*postavlja se jumping na 1, pa ako stoji na necemu bice 0*/
     state.jumping = 1;
-    Side side;
-    Object p;
-    /**************************new*******************************/
     ObjectNode* l;
     for (l=Blocks; l!=NULL; l=l->next){
-        p=*(l->o);
-        /*copy pasta*/
-        if (hasCollision(player, p)) {
+        Object* p = l->o;
+        if (hasCollision(&player, p)) {
             /*kolizija sa podom*/
-            if (isAbove(player, p)) {
+            if (isAbove(&player, p)) {
                 /*ako je igrac iznad p, ali nije skroz u njemu, ignorise koliziju*/
-                if (aIsInb(player, p)) {
-                    player.posy = p.posy + p.height / 2 + player.height / 2;
-                    state.jumping = 0;
-                    state.flying = 0;
-                    player.vy.curr = 0;
-
-                    Color c = getColor( & p);
-                    switch (c) {
-                    case (BLUE):
-                        state.bigJump = 1;
-                        state.goFast = 0;
-                        break;
-                    case (ORANGE):
-                        state.goFast = 1;
-                        state.bigJump = 0;
-                        break;
-                    case (WHITE):
-                    case (BLACK):
-                    case (OTHER):
-                    default:
-                        state.bigJump = 0;
-                        state.goFast = 0;
-                        break;
-                    }
+                if (aIsInb(&player, p)) {
+                    playerOnBlockReact(p);
                 }
                 /*kolizija sa plafonom*/
-            } else if (isBelow(player, p)) {
+            } else if (isBelow(&player, p)) {
                 player.posy -= eps;
                 if (player.vy.curr > 0) {
                     player.vy.curr = -player.vy.curr / 2;
@@ -162,19 +140,19 @@ void playerCollision(void)
                 }
             } else {
                 /*ako je kolizija sa strane spreci igraca da ulazi u objekat*/
-                side = aRelativeTob(player, p);
+                Side side = aRelativeTob(&player, p);
                 switch (side) {
                 case FRONT:
-                    player.posz = p.posz + p.width / 2 + player.width / 2 + eps;
+                    player.posz = p->posz + p->width / 2 + player.width / 2 + eps;
                     break;
                 case BACK:
-                    player.posz = p.posz - p.width / 2 - player.width / 2 - eps;
+                    player.posz = p->posz - p->width / 2 - player.width / 2 - eps;
                     break;
                 case LEFT:
-                    player.posx = p.posx - p.length / 2 - player.length / 2 - eps;
+                    player.posx = p->posx - p->length / 2 - player.length / 2 - eps;
                     break;
                 case RIGHT:
-                    player.posx = p.posx + p.length / 2 + player.length / 2 + eps;
+                    player.posx = p->posx + p->length / 2 + player.length / 2 + eps;
                     break;
                 default:
                     break;
@@ -182,64 +160,63 @@ void playerCollision(void)
             }
         }
     }
-
-    /************************************************************/
 }
 
-/*prodji kroz sve slotove, ako je aktivan metak proveri koliziju sa kockama*/
+/*prolazi kroz sve slotove, ako je aktivan metak proveri koliziju sa kockama*/
 void bulletCollision(void)
 {
     int i;
     for (i = 0; i < MAX_BULLETS; i++) {
         if (bullets_active[i]) {
-
-            /******************************new***********************/
             ObjectNode* l;
-            for (l=Blocks; l!=NULL; l=l->next){
-                Object p=*(l->o);
+            for (l = Blocks; l != NULL; l = l->next){
+                Object* block = l->o;
 
-                if (hasCollision(p, bullets[i])) {
+                if (hasCollision(block, &bullets[i])) {
                     bullets_active[i] = 0;
-                    paintBlock(l->o, &bullets[i]);
-                    /*********************new***************/
-                    if (state.buildMode){
-                        Object o=p;//sredi vars
-                        /*ako je blok pogodjen crnom bojom onda se brise*/
-                        if (getColor(&bullets[i])==BLACK){
-                            removeNode(&Blocks, l);
-                            printf("removed block\n");
-                        }else if (isAbove(bullets[i],o)){
-                            addToList(&Blocks,o.posx, o.posy+o.height, o.posz);
-                        }else if (isBelow(bullets[i],o)){
-                            addToList(&Blocks,o.posx, o.posy-o.height, o.posz);
-                        }else{
-                            Side side = aRelativeTob(bullets[i], o);
-                            float x=o.posx,y=o.posy,z=o.posz;
-                            switch (side) {
-                            case FRONT:
-                                z+=o.width;
-                                break;
-                            case BACK:
-                                z-=o.width;
-                                break;
-                            case LEFT:
-                                x-=o.length;
-                                break;
-                            case RIGHT:
-                                x+=o.length;
-                                break;
-                            default:
-                                break;
-                        }
-
-                        addToList(&Blocks, x, y, z);
-                        }
-                    }
-                    /**************************************/
+                    paintBlock(block, &bullets[i]);
+                    bulletCollisionBuildMode(&bullets[i], l);
                     break;
                 }
             }
-            /***********************************************************/
         }
+    }
+}
+
+void bulletCollisionBuildMode(Object* bullet, ObjectNode* blockNode)
+{
+    if (!state.buildMode)
+        return;
+    Object* block = blockNode->o;
+    /*ako je blok pogodjen crnom bojom onda se brise*/
+    if (getColor(bullet) == BLACK){
+        removeNode(&Blocks, blockNode);
+    /*inace napravi novi blok sa one strane bloka gde je udario metak*/
+    }else if (isAbove(bullet, block)){
+        addToList(&Blocks, block->posx, block->posy + block->height, block->posz);
+
+    }else if (isBelow(bullet, block)){
+        addToList(&Blocks, block->posx, block->posy - block->height, block->posz);
+
+    }else{
+        Side side = aRelativeTob(bullet, block);
+        float x = block->posx, y = block->posy, z = block->posz;
+        switch (side) {
+        case FRONT:
+            z += block->width;
+            break;
+        case BACK:
+            z -= block->width;
+            break;
+        case LEFT:
+            x -= block->length;
+            break;
+        case RIGHT:
+            x += block->length;
+            break;
+        default:
+            break;
+        }
+        addToList(&Blocks, x, y, z);
     }
 }

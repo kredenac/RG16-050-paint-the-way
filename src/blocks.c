@@ -2,7 +2,7 @@
 
 Object* createBlock();
 
-
+const float scale = 2;
 int NUM_OF_BLOCKS=0;
 ObjectNode* Blocks=NULL;
 
@@ -13,12 +13,12 @@ ObjectNode* createNode(float x, float y, float z)
         printf("Greska pri alokaciji novog ObjectNode\n");
         exit(EXIT_FAILURE);
     }
-    new->next=NULL;
+    new->next = NULL;
     Object* obj = createBlock();
     obj->posx = x;
     obj->posy = y;
     obj->posz = z;
-    new->o=obj;
+    new->o = obj;
     return new;
 }
 
@@ -36,13 +36,14 @@ void freeList(ObjectNode** listHead)
     /* Sledeci cvor je nova glava liste */
     *listHead = p;
   }
+  NUM_OF_BLOCKS=0;
 }
 
 void addToList(ObjectNode** listHead, float x, float y, float z)
 {
-    ObjectNode* new=createNode(x,y,z);
-    new->next=*listHead;
-    *listHead=new;
+    ObjectNode* new = createNode(x,y,z);
+    new->next = *listHead;
+    *listHead = new;
     NUM_OF_BLOCKS++;
 }
 
@@ -67,15 +68,14 @@ void removeNode(ObjectNode** listHead, ObjectNode* rm)
             NUM_OF_BLOCKS--;
             return;
         }
-        l=l->next;
+        l = l->next;
     }
-    printf("Neuspesno brisanje ObjectNode\n");
 }
 
 
 
-static const float scale = 2;
 static float sizex, sizey, sizez;
+/*postavlja velicine blokova koji se stvaraju*/
 void setSizes(float x, float y, float z)
 {
     sizex = x;
@@ -85,7 +85,7 @@ void setSizes(float x, float y, float z)
 
 Object* createBlock()
 {
-    Object* novi = (Object* ) malloc(sizeof(Object));
+    Object* novi = (Object*) malloc(sizeof(Object));
     if (novi == NULL){
         printf("Greska pri alokaciji novog Object-a\n");
         exit(EXIT_FAILURE);
@@ -100,9 +100,9 @@ Object* createBlock()
     return novi;
 }
 
-
 #define SWAP(x, y, T) do {T SWAP = x; x = y; y = SWAP;} while (0)
-
+/*popunjava kvadar kockama od beg do end po svakoj osi. ako su beg i end
+jednaki, onda se stvara samo jedna kocka po toj osi.*/
 void addBlocks(float begx, float endx, float begy, float endy, float begz, float endz)
 {
     if (begx > endx) SWAP(begx, endx, float);
@@ -115,21 +115,16 @@ void addBlocks(float begx, float endx, float begy, float endy, float begz, float
     for (x = begx; x <= endx; x += sizex) {
         for (y = begy; y <= endy; y += sizey) {
             for (z = begz; z <= endz; z += sizez) {
-
                 count++;
-                /***********************new************/
                 addToList(&Blocks, x, y, z);
-                /****************************************/
             }
         }
     }
     //printf("novi blokovi:%d ukupno:%d\n",count,NUM_BLOCKS);
 }
 
-
-void initCubes()
+void initBlocks()
 {
     freeList(&Blocks);
-    NUM_OF_BLOCKS=0;
-    loadBlocks();
+    loadMap(1);
 }

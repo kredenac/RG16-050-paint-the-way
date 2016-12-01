@@ -28,9 +28,9 @@ typedef struct{
     Val2f vx;
     Val2f vy;
     Val2f vz;
-    float length;
-    float height;
-    float width;
+    float length;/*x*/
+    float height;/*y*/
+    float width;/*z*/
     float color[3];
 }Object;
 
@@ -64,10 +64,10 @@ extern void jump(void);
 extern void fireBlackPaint(void);
 extern void flyDown(void);
 extern void toggleBuildMode(void);
+extern void playerOnBlockReact(Object* p);
 
 extern Object player;
-
-extern float lastPosx, lastPosz, lastPosy;
+/*extern float lastPosx, lastPosz, lastPosy;*/
 extern float GRAVITY;
 extern float rotWorld;
 extern Val2f viewAzimuth;

@@ -2,7 +2,7 @@
 
 const Object playerInit = {
     .posx = 0,
-    .posy = 1,
+    .posy = 0,
     .posz = 2,
     .vx = {0, 0},
     .vy = {0, 0},
@@ -76,9 +76,9 @@ void movePlayer()
     player.vx.goal = approach(0, player.vx.goal, step / 10);
     player.vy.goal = approach(GRAVITY, player.vy.goal, step);
     //printf("xcurr%f, xgoal%f, zcurr%f ,zgoal%f\n",player.vx.curr,player.vx.goal,player.vz.curr,player.vz.goal);
-    lastPosx = player.posx;
+    /*lastPosx = player.posx;
     lastPosz = player.posz;
-    lastPosy = player.posy;
+    lastPosy = player.posy;*/
     /*pomeraj levo-desno u odnosu na kameru*/
     player.posx += r[0] * player.vx.curr * d;
     player.posz += r[2] * player.vx.curr * d;
@@ -255,6 +255,8 @@ void flyDown(void)
 
 void fireBlackPaint(void)
 {
+    if (!state.buildMode)
+        return;
     Color last=state.fireColor;
     state.fireColor=BLACK;
     firePaint();
@@ -267,5 +269,32 @@ void toggleBuildMode(void)
     printf("%s build mode\n", state.buildMode? "Ukljucen" : "Iskljucen");
     if (!state.buildMode){
         state.flying=0;
+    }
+}
+
+void playerOnBlockReact(Object* p)
+{
+    player.posy = p->posy + p->height / 2 + player.height / 2;
+    state.jumping = 0;
+    state.flying = 0;
+    player.vy.curr = 0;
+
+    Color c = getColor(p);
+    switch (c) {
+    case (BLUE):
+        state.bigJump = 1;
+        state.goFast = 0;
+        break;
+    case (ORANGE):
+        state.goFast = 1;
+        state.bigJump = 0;
+        break;
+    case (WHITE):
+    case (BLACK):
+    case (OTHER):
+    default:
+        state.bigJump = 0;
+        state.goFast = 0;
+        break;
     }
 }

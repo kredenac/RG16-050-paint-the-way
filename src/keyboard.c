@@ -5,9 +5,11 @@ static int KEY_W = 0;
 static int KEY_S = 0;
 static int KEY_A = 0;
 static int KEY_D = 0;
+static int KEY_Q = 0;
+static int KEY_SPACE = 0;
 static int fullScreen = 0;
 float initWindowHeight = 800;
-static float viewAzimuthdt = 15, viewElevationdt = 5;
+static float viewAzimuthdt = 5, viewElevationdt = 3;
 float aspectRatio = 16 / 9.0;
 
 void onMouseButton(int button, int pressed, int x, int y)
@@ -20,9 +22,7 @@ void onMouseButton(int button, int pressed, int x, int y)
         }
     }
     if (button == GLUT_RIGHT_BUTTON) {
-
-        if (pressed == GLUT_DOWN && state.buildMode) {
-            /****************new*********************/
+        if (pressed == GLUT_DOWN) {
             fireBlackPaint();
         }
     }
@@ -79,20 +79,25 @@ void onMousePressedLook(int x, int y)
 }
 
 static const float moveSpeed=0.05;
+#define NORM_SPEED 0.1
 void onKeyHold()
 {
     /*ako ide brzo a nije na narandzastom */
-    if (fabsf(player.vz.curr > 0.1) && !state.goFast)
+    if (fabsf(player.vz.curr > NORM_SPEED) && !state.goFast)
         return;
-    float bonus = (state.goFast) ? 0.1 : 0;
+    float bonus = (state.goFast) ? NORM_SPEED : 0;
     if (KEY_W)
         player.vz.goal = moveSpeed + bonus;
     if (KEY_S)
-        player.vz.goal = -moveSpeed - bonus;
+        player.vz.goal = -(moveSpeed + bonus);
     if (KEY_A)
-        player.vx.goal = -moveSpeed - bonus;
+        player.vx.goal = -(moveSpeed + bonus);
     if (KEY_D)
         player.vx.goal = moveSpeed + bonus;
+    if (state.flying && KEY_SPACE)
+        jump();
+    if (state.flying && KEY_Q)
+        flyDown();
 }
 
 /*ne treba mi vise al nek stoji za ukras*/
@@ -114,6 +119,12 @@ void onSpecialInput(int key, int x, int y)
     }
 
     switch (key) {
+    case (GLUT_KEY_F1):
+        saveMap();
+        break;
+    case (GLUT_KEY_F2):
+        loadMap(0);
+        break;
     case (GLUT_KEY_RIGHT):
         viewAzimuth.curr += viewAzimuthdt;
         break;
@@ -156,7 +167,14 @@ void onKeyboardUp(unsigned char key, int x, int y)
         KEY_S = 0;
         player.vz.goal = 0;
         break;
+    case (' '):
+        KEY_SPACE = 0;
+        break;
+    case ('q'):
+        KEY_Q=0;
+        break;
     }
+
 }
 
 void onKeyboard(unsigned char key, int x, int y)
@@ -172,6 +190,7 @@ void onKeyboard(unsigned char key, int x, int y)
         firePaint();
         break;
     case (' '):
+        KEY_SPACE = 1;
         jump();
         break;
     case ('s'):
@@ -217,6 +236,7 @@ void onKeyboard(unsigned char key, int x, int y)
         toggleBuildMode();
         break;
     case ('0'):
+        /*teleport na kraj za lakse testiranje*/
         player.posy = 11.8, player.posx = 0, player.posz = -18;
         break;
     case ('p'):
@@ -229,13 +249,13 @@ void onKeyboard(unsigned char key, int x, int y)
         }
         break;
     case ('q'):
+        KEY_Q=1;
         flyDown();
         break;
     case (ESC):
         exit(0);
         break;
     }
-    //printf("feet pos: x=%f, y=%f, z=%f\n",player.posx,player.posy-player.height/2,player.posz);
 }
 
 void onReshape(int width, int height)

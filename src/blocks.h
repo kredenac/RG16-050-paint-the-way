@@ -4,6 +4,8 @@
 #include <stdlib.h>
 #include "player.h"
 
+#define DEFAULT_MAP "src/hello.map"
+
 typedef struct ObjectNode{
     struct ObjectNode* next;
     Object* o;
@@ -11,12 +13,12 @@ typedef struct ObjectNode{
 
 extern void addBlocks(float begx, float endx, float begy, float endy, float begz, float endz);
 extern void setSizes(float x, float y, float z);
-extern void initCubes(void);
+extern void initBlocks(void);
 extern void addToList(ObjectNode** listHead, float x, float y, float z);
 extern void removeNode(ObjectNode** listHead, ObjectNode* rm);
+extern void freeList(ObjectNode** listHead);
 extern int NUM_OF_BLOCKS;
-
+extern const float scale;
 extern ObjectNode* Blocks;
-
 
 #endif

@@ -4,7 +4,7 @@
 #include <math.h>
 #include "player.h"
 #include "miscfunc.h"
-#include "draw.h"//
+#include "draw.h"
 #include "blocks.h"
 typedef enum {
     TOP,
@@ -14,7 +14,7 @@ typedef enum {
     LEFT,/*x-*/
     RIGHT/*x+*/
 }Side;
-extern int hasCollision(Object a, Object b);
+//extern int hasCollision(Object a, Object b);
 extern void playerCollision(void);
 extern void bulletCollision(void);
 #endif

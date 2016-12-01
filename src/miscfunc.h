@@ -17,7 +17,10 @@ extern void setColor(Object* op, float r, float g, float b);
 extern void set3fWithColor(Color c,float* r1, float* g1, float* b1);
 extern Color getColor(Object* o);
 
-extern void loadBlocks(void);
+extern void loadMap(int defaultMap);
+extern void saveMap(void);
+extern void loadBlocks(char* name);
 extern void resetGame(void);
 extern void normalize3f(float* x, float* y, float* z);
+
 #endif

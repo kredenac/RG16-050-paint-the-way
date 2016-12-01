@@ -1,7 +1,5 @@
 #include "draw.h"
 
-
-
 int lightOn[MAX_LIGHTS];
 int lights[] = {
     GL_LIGHT0,
@@ -114,10 +112,10 @@ void positionCam(void)
         upx, upy, upz);
 }
 
-void map()
+void drawMap()
 {
     ObjectNode* l;
-    for (l=Blocks; l!=NULL; l=l->next){
+    for (l = Blocks; l != NULL; l = l->next){
         drawCube(l->o);
     }
 }

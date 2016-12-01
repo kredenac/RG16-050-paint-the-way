@@ -13,7 +13,7 @@ extern int lightOn[];
 extern void drawCube(Object* o);
 extern void drawWithColor(Object* o);
 extern void drawBullets(void);
-extern void map(void);
+extern void drawMap(void);
 extern void lightSetup(void);
 extern void materialSetup(void);
 extern void psychedelic(int interval);
