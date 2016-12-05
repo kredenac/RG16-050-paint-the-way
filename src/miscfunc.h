@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <GL/glut.h>
+#include <string.h>
 #include "player.h"
 #include "draw.h"
 #include "blocks.h"

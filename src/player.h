@@ -2,6 +2,7 @@
 #define PLAYER_H
 #include <stdio.h>
 #include <math.h>
+
 /*miscfunc.h includuje player.h i tako u krug pa moram ovde da stavim boje*/
 typedef enum {
     WHITE,
@@ -67,7 +68,6 @@ extern void toggleBuildMode(void);
 extern void playerOnBlockReact(Object* p);
 
 extern Object player;
-/*extern float lastPosx, lastPosz, lastPosy;*/
 extern float GRAVITY;
 extern float rotWorld;
 extern Val2f viewAzimuth;
@@ -83,7 +83,7 @@ extern float lookAtx, lookAty, lookAtz;
 extern float upx, upy, upz;
 
 extern Object bullets[];
-extern int bullets_active[];
+extern int bulletsActive[];
 /*miscfunc.h includuje player.h i obrnuto pa se upletu ...*/
 #include "miscfunc.h"
 #endif

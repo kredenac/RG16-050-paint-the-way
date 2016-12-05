@@ -11,7 +11,7 @@
 #include "blocks.h"
 int dt;
 static int oldDisplayTime;
-void onTimerUpdate(int id);
+static void onTimerUpdate(int id);
 static void onDisplay(void);
 static void updateDeltaTime(void);
 static void fps(int print);
@@ -62,7 +62,6 @@ void onDisplay(void)
     positionCam();
 
     lightSetup();
-    materialSetup();
 
     drawMap();
     drawBullets();
@@ -119,7 +118,7 @@ void fps(int print)
     static int frame = 0;
     frame++;
     if (print && timeSum >= SECOND){
-        printf("fps:%f minTime=%d maxTime=%d\n",
+        printf("fps:%.2f minTime=%d maxTime=%d\n",
             frame * SECOND / (float)timeSum, minTime, maxTime);
         timeSum = 0;
         frame = 0;

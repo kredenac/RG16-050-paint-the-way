@@ -6,9 +6,10 @@ static int isAbove(Object* ap, Object* bp);
 static Side aRelativeTob(Object* ap, Object* bp);
 static void bulletCollisionBuildMode(Object* bullet, ObjectNode* blockNode);
 
+/*proverava da li range mina-maxa ima presek sa minb-maxb*/
 int rangeIntersect(float mina, float maxa, float minb, float maxb)
 {
-    return maxa >= minb && mina <= maxb;
+    return maxa > minb && mina < maxb;
 }
 
 /*proverava da li dva objekta imaju presek po svakoj osi,
@@ -58,7 +59,10 @@ int aIsInb(Object* ap, Object* bp)
     return interx && interz;
 }
 
+/*za playera se uzima u obzir i visina kolena - jer do te visine moze da
+se popne na objekat iako nije skroz ispod njega*/
 static float kneeHeight = 0.25;
+/*racuna da li je a iznad b*/
 int isAbove(Object* ap, Object* bp)
 {
     Object a = *ap, b = *bp;
@@ -66,9 +70,9 @@ int isAbove(Object* ap, Object* bp)
     /*ako je isti width kao player smatram da je to bas on*/
     float offset=(a.width==player.width) ? kneeHeight : 0;
     return y - offset > b.posy + b.height / 2;
-    // return lastPosy - kneeHeight > b.posy + b.height / 2;
 }
 
+/*racuna da li je a ispod b*/
 int isBelow(Object* ap, Object* bp)
 {
     Object a = *ap, b = *bp;
@@ -109,7 +113,6 @@ Side aRelativeTob(Object* ap, Object* bp)
         az = fabsf(frontz - az);
     }
     /*da li je a blizi b po x ili z osi?*/
-    //printf("%s a.x=%f a.z=%f\n ",(ax<az) ? "Blizi x" : "Blizi z",testx,testz);
     return (ax < az) ? x : z;
 }
 
@@ -122,7 +125,7 @@ void playerCollision(void)
     /*postavlja se jumping na 1, pa ako stoji na necemu bice 0*/
     state.jumping = 1;
     ObjectNode* l;
-    for (l=Blocks; l!=NULL; l=l->next){
+    for (l = Blocks; l != NULL; l = l->next){
         Object* p = l->o;
         if (hasCollision(&player, p)) {
             /*kolizija sa podom*/
@@ -167,13 +170,13 @@ void bulletCollision(void)
 {
     int i;
     for (i = 0; i < MAX_BULLETS; i++) {
-        if (bullets_active[i]) {
+        if (bulletsActive[i]) {
             ObjectNode* l;
-            for (l = Blocks; l != NULL; l = l->next){
+            for (l = Blocks; l != NULL; l = l->next) {
                 Object* block = l->o;
 
                 if (hasCollision(block, &bullets[i])) {
-                    bullets_active[i] = 0;
+                    bulletsActive[i] = 0;
                     paintBlock(block, &bullets[i]);
                     bulletCollisionBuildMode(&bullets[i], l);
                     break;
@@ -183,40 +186,60 @@ void bulletCollision(void)
     }
 }
 
+/*kada se brisu blokovi koji svetle oni se prvo oboje u crno, i iskljuci se
+svetlo, tako da ovde ne treba da pazim o tome*/
 void bulletCollisionBuildMode(Object* bullet, ObjectNode* blockNode)
 {
     if (!state.buildMode)
         return;
     Object* block = blockNode->o;
+    float x = block->posx, y = block->posy, z = block->posz;
     /*ako je blok pogodjen crnom bojom onda se brise*/
-    if (getColor(bullet) == BLACK){
+    if (getColor(bullet) == BLACK) {
         removeNode(&Blocks, blockNode);
+        return;
     /*inace napravi novi blok sa one strane bloka gde je udario metak*/
-    }else if (isAbove(bullet, block)){
-        addToList(&Blocks, block->posx, block->posy + block->height, block->posz);
-
-    }else if (isBelow(bullet, block)){
-        addToList(&Blocks, block->posx, block->posy - block->height, block->posz);
-
-    }else{
+    /**postavi ga iznad*/
+    } else if (isAbove(bullet, block)) {
+        y = block->posy + block->height / 2 + sizey / 2;
+    /**postavi ga ispod*/
+    } else if (isBelow(bullet, block)) {
+        y = block->posy - block->height /2 - sizey / 2;
+    /**postavi ga sa strane gde je metak udario blok*/
+    } else {
         Side side = aRelativeTob(bullet, block);
-        float x = block->posx, y = block->posy, z = block->posz;
         switch (side) {
         case FRONT:
-            z += block->width;
+            z += block->width / 2 + sizez / 2;
             break;
         case BACK:
-            z -= block->width;
+            z -= block->width / 2 + sizez / 2;
             break;
         case LEFT:
-            x -= block->length;
+            x -= block->length / 2 + sizex / 2;
             break;
         case RIGHT:
-            x += block->length;
+            x += block->length  / 2 + sizex / 2;
             break;
         default:
             break;
         }
-        addToList(&Blocks, x, y, z);
     }
+    /*pravim test blok*/
+    Object test;
+    test.posx = x, test.posy = y, test.posz = z;
+    test.length = sizex, test.height = sizey, test.width = sizez;
+    /*ako on ima koliziju sa igracem ne stvara se*/
+    if (hasCollision(&test, &player)) {
+        return;
+    }
+    /*ne stvara se ni ako ima koliziju sa nekim druigm blokom*/
+    ObjectNode* l;
+    for (l = Blocks; l != NULL; l = l->next){
+        Object* p = l->o;
+        if (hasCollision(&test, p)) {
+            return;
+        }
+    }
+    addToList(&Blocks, x, y, z);
 }

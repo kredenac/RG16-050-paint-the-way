@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include "player.h"
 #include "blocks.h"
-//#include "collision.h"
 
 extern int lightOn[];
 #define MAX_LIGHTS 8
@@ -15,7 +14,7 @@ extern void drawWithColor(Object* o);
 extern void drawBullets(void);
 extern void drawMap(void);
 extern void lightSetup(void);
-extern void materialSetup(void);
+extern void initMaterial(void);
 extern void psychedelic(int interval);
 extern void setLightPos(int n, float x, float y, float z);
 extern void initLights();

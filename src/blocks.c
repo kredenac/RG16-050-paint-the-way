@@ -4,8 +4,11 @@ Object* createBlock();
 
 const float scale = 2;
 int NUM_OF_BLOCKS=0;
+/*pokazivac na pocetak liste koja cuva blokove*/
+/*koristi se lista jer u build modu mogu da se brisu i dodaju blokovi*/
 ObjectNode* Blocks=NULL;
 
+/*Pravi novi ObjectNode i Objekat u njemu postavlja na x,y,z poziciju*/
 ObjectNode* createNode(float x, float y, float z)
 {
     ObjectNode* new= (ObjectNode*) malloc(sizeof(ObjectNode));
@@ -22,23 +25,38 @@ ObjectNode* createNode(float x, float y, float z)
     return new;
 }
 
-void freeList(ObjectNode** listHead)
+/*prebrojava elemnte liste. sluzi za testiranje*/
+void countList(ObjectNode* listHead)
 {
-  ObjectNode* p= NULL;
-  /* Ako lista nije prazna, onda treba osloboditi memoriju */
-  while (*listHead != NULL) {
-    /* Potrebno je prvo zapamtiti adresu sledeceg cvora i onda
-       osloboditi cvor koji predstavlja glavu liste */
-    p = (*listHead)->next;
-    free((*listHead)->o);
-    free(*listHead);
-
-    /* Sledeci cvor je nova glava liste */
-    *listHead = p;
-  }
-  NUM_OF_BLOCKS=0;
+    int i=0;
+    while (listHead != NULL) {
+        listHead = listHead->next;
+        i++;
+    }
+    printf("Broj elemenata liste je %d\n",i);
 }
 
+/*oslobodi listu pri resetovanju ili loadovanju nove mape*/
+void freeList(ObjectNode** listHead)
+{
+    ObjectNode* p = NULL;
+    /* Ako lista nije prazna, onda treba osloboditi memoriju */
+    while (*listHead != NULL) {
+        /* Potrebno je prvo zapamtiti adresu sledeceg cvora i onda
+        osloboditi cvor koji predstavlja glavu liste */
+        p = (*listHead)->next;
+        if ((*listHead)->o==NULL ) printf("*listHead->0 je NULL\n");
+        free((*listHead)->o);
+        if ((*listHead)==NULL ) printf("*listHead je NULL\n");
+        free(*listHead);
+
+        /* Sledeci cvor je nova glava liste */
+        *listHead = p;
+    }
+    NUM_OF_BLOCKS=0;
+}
+
+/*dodaje se novi element u listu*/
 void addToList(ObjectNode** listHead, float x, float y, float z)
 {
     ObjectNode* new = createNode(x,y,z);
@@ -47,11 +65,13 @@ void addToList(ObjectNode** listHead, float x, float y, float z)
     NUM_OF_BLOCKS++;
 }
 
+/*uklanja cvor rm iz liste*/
 void removeNode(ObjectNode** listHead, ObjectNode* rm)
 {
     /*ako je bas prvi element liste onaj koji treba da se ukloni*/
     if (*listHead == rm ){
         (*listHead)=rm->next;
+        if (rm->o == NULL || rm==NULL ) printf("rm je NULL\n");
         free(rm->o);
         free(rm);
         NUM_OF_BLOCKS--;
@@ -63,6 +83,7 @@ void removeNode(ObjectNode** listHead, ObjectNode* rm)
     while (l != NULL){
         if (l->next == rm ){
             l->next = rm->next;
+            if (rm->o == NULL || rm==NULL ) printf("rm je NULL (while)\n");
             free(rm->o);
             free(rm);
             NUM_OF_BLOCKS--;
@@ -72,9 +93,7 @@ void removeNode(ObjectNode** listHead, ObjectNode* rm)
     }
 }
 
-
-
-static float sizex, sizey, sizez;
+float sizex, sizey, sizez;
 /*postavlja velicine blokova koji se stvaraju*/
 void setSizes(float x, float y, float z)
 {
@@ -83,6 +102,7 @@ void setSizes(float x, float y, float z)
     sizez = z;
 }
 
+/*pravi novi blok cije su dimenzije sizex,y,z*/
 Object* createBlock()
 {
     Object* novi = (Object*) malloc(sizeof(Object));
@@ -94,9 +114,9 @@ Object* createBlock()
     novi->height = sizey;
     novi->width = sizez;
 
-    novi->color[0] = rand() / (float)(RAND_MAX);
-    novi->color[1] = rand() / (float)(RAND_MAX);
-    novi->color[2] = rand() / (float)(RAND_MAX);
+    novi->color[0] = 0.5;
+    novi->color[1] = 0.5;
+    novi->color[2] = 0.5;
     return novi;
 }
 
@@ -123,6 +143,7 @@ void addBlocks(float begx, float endx, float begy, float endy, float begz, float
     //printf("novi blokovi:%d ukupno:%d\n",count,NUM_BLOCKS);
 }
 
+/*oslobadja listu i loaduje default mapu*/
 void initBlocks()
 {
     freeList(&Blocks);

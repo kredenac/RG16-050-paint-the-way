@@ -78,7 +78,7 @@ Color getColor(Object* o)
 
 /*zbog reprezentacije float-a cesto ne budu jednaki kada ih poredim bez castovanja*/
 /*takodje sluzi ako ne insistiram da boje moraju biti bas identicne*/
-const float eps = 0.01;
+static const float eps = 0.01;
 
 int isequal(float a, float b)
 {
@@ -92,10 +92,16 @@ int isequal(float a, float b)
 void saveMap()
 {
     printf("Unesi ime nove mape:\n");
+    char path[30];
     char name[20];
-    scanf("%s",name);
-    printf("uneto ime %s\n",name);
-    FILE* f = fopen(name,"w");
+    /*posto bude neko djubre postavim na term nulu*/
+    path[0]='\0';
+    strcat(path, "./src/maps/");
+    scanf("%s", name);
+    printf("uneto ime %s\n", name);
+    /*pravi se putanja do novog fajla*/
+    strcat(path, name);
+    FILE* f = fopen(path, "w");
     if (f == NULL) {
         printf("greska pri pravljenju novog fajla\n");
         exit(EXIT_FAILURE);
@@ -114,36 +120,49 @@ void saveMap()
         fprintf(f, "c %.3f %.3f %.3f\n", block.posx / scale, block.posy / scale,
          block.posz / scale);
     }
-    fprintf(f, "#Num of blocks: %d\n",i);
+    fprintf(f, "#Num of blocks: %d\n", i);
     fclose(f);
 }
 
+static int isDefaultMap=1;
 /*Ucitava se fajl koji je sledeceg formata:*/
 /*ako linija pocinje sa s - to su duzina, visina i sirina kvadra*/
 /*ako linija pocinje sa c - to su koordinate objekta. ostale linije se ignorisu*/
+
 void loadMap(int defaultMap)
 {
+    char path[30];
     char name[20];
+    /*posto bude neko djubre postavim na term nulu*/
+    path[0]='\0';
+    strcat(path, "./src/maps/");
     FILE* f;
+    isDefaultMap = defaultMap;
     if (defaultMap) {
-        f = fopen(DEFAULT_MAP, "r");
+        strcat(path, DEFAULT_MAP);
+        f = fopen(path, "r");
     } else {
         printf("Koju mapu da loadujem?\n");
-        scanf("%s",name);
-        f = fopen(name, "r");
+        scanf("%s", name);
+        /*pravi se putanja do novog fajla*/
+        strcat(path, name);
+        f = fopen(path, "r");
     }
     if (f == NULL) {
         printf("greska pri otvaranju .map fajla\n");
         exit(EXIT_FAILURE);
     }
+    /*oslobadja se lista proslih blokova*/
     freeList(&Blocks);
     char line[MAX_LINE];
     int count, i=0;
     float x, y, z;
     float sizex, sizey, sizez;
+    /*citaju se linije .map fajla*/
     while (!feof(f)) {
         fgets(line, MAX_LINE, f);
         i++;
+        /*ako je prvi char linije s tad se postavljaju dimenzije blokova*/
         if (line[0] == 's') {
             count = sscanf(&line[1], "%f %f %f", &sizex, &sizey, &sizez);
             if (count != 3) {
@@ -151,6 +170,7 @@ void loadMap(int defaultMap)
                 exit(EXIT_FAILURE);
             }
             setSizes(sizex, sizey, sizez);
+        /*kad je prvi char c to su koordinate blokova*/
         } else if (line[0] == 'c') {
             count = sscanf(&line[1], "%f %f %f", &x, &y, &z);
             if (count != 3) {
@@ -162,12 +182,19 @@ void loadMap(int defaultMap)
         }
     }
     fclose(f);
+    if(!isDefaultMap){
+        resetGame();
+    }
 }
 
+/*zluzi i za resetovanje i za inicijalizaciju nove partije*/
 void resetGame(void)
 {
     resetBullets();
-    initBlocks();
+    if (isDefaultMap){
+        initBlocks();
+    }
+    initMaterial();
     initLights();
     state = stateInit;
     player = playerInit;
