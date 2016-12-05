@@ -2,11 +2,13 @@
 #define PLAYER_H
 #include <stdio.h>
 #include <math.h>
+
 /*miscfunc.h includuje player.h i tako u krug pa moram ovde da stavim boje*/
 typedef enum {
     WHITE,
     BLUE,
     ORANGE,
+    BLACK,
     OTHER
 }Color;
 
@@ -27,9 +29,9 @@ typedef struct{
     Val2f vx;
     Val2f vy;
     Val2f vz;
-    float length;
-    float height;
-    float width;
+    float length;/*x*/
+    float height;/*y*/
+    float width;/*z*/
     float color[3];
 }Object;
 
@@ -40,6 +42,8 @@ typedef struct{
     int goFast;
     int finishedGame;
     int newGame;
+    int buildMode;
+    int flying;
 }State;
 
 
@@ -57,9 +61,13 @@ extern void moveBullets(void);
 extern void positionCam(void);
 extern void onKeyHold(void);
 extern void checkEvents(void);
-extern Object player;
+extern void jump(void);
+extern void fireBlackPaint(void);
+extern void flyDown(void);
+extern void toggleBuildMode(void);
+extern void playerOnBlockReact(Object* p);
 
-extern float lastPosx, lastPosz, lastPosy;
+extern Object player;
 extern float GRAVITY;
 extern float rotWorld;
 extern Val2f viewAzimuth;
@@ -75,7 +83,7 @@ extern float lookAtx, lookAty, lookAtz;
 extern float upx, upy, upz;
 
 extern Object bullets[];
-extern int bullets_active[];
+extern int bulletsActive[];
 /*miscfunc.h includuje player.h i obrnuto pa se upletu ...*/
 #include "miscfunc.h"
 #endif

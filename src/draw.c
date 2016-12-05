@@ -1,58 +1,5 @@
 #include "draw.h"
 
-static const float scale = 2;
-static float sizex, sizey, sizez;
-void setSizes(float x, float y, float z)
-{
-    sizex = x;
-    sizey = y;
-    sizez = z;
-}
-
-Object* createBlock()
-{
-    Object* novi = (Object* ) malloc(sizeof(Object));
-    if (novi == NULL)
-        return NULL;
-    novi->length = sizex;
-    novi->height = sizey;
-    novi->width = sizez;
-
-    novi->color[0] = (float) rand() / (float)(RAND_MAX);
-    novi->color[1] = (float) rand() / (float)(RAND_MAX);
-    novi->color[2] = (float) rand() / (float)(RAND_MAX);
-    return novi;
-}
-
-int NUM_BLOCKS = 0;
-Object* blocks[1000];
-
-#define SWAP(x, y, T) do {T SWAP = x; x = y; y = SWAP;} while (0)
-
-void addBlocks(float begx, float endx, float begy, float endy, float begz, float endz)
-{
-    if (begx > endx) SWAP(begx, endx, float);
-    if (begy > endy) SWAP(begy, endy, float);
-    if (begz > endz) SWAP(begz, endz, float);
-    int count = 0;
-    begx *= scale, endx *= scale, begy *= scale;
-    endy *= scale, begz *= scale, endz *= scale;
-    float x, y, z;
-    for (x = begx; x <= endx; x += sizex) {
-        for (y = begy; y <= endy; y += sizey) {
-            for (z = begz; z <= endz; z += sizez) {
-                blocks[NUM_BLOCKS] = createBlock();
-                blocks[NUM_BLOCKS]->posx = x;
-                blocks[NUM_BLOCKS]->posy = y;
-                blocks[NUM_BLOCKS]->posz = z;
-                NUM_BLOCKS++;
-                count++;
-            }
-        }
-    }
-    //printf("novi blokovi:%d ukupno:%d\n",count,NUM_BLOCKS);
-}
-
 int lightOn[MAX_LIGHTS];
 int lights[] = {
     GL_LIGHT0,
@@ -66,6 +13,7 @@ int lights[] = {
 };
 float lightPos[MAX_LIGHTS][4];
 
+/*ukljucuju se i pozicioniraju aktivna svetla*/
 void lightSetup()
 {
     glEnable(GL_LIGHTING);
@@ -79,14 +27,17 @@ void lightSetup()
         }
     }
 }
+
+/*inicijalna svojstva svetlosti*/
 void initLights()
 {
-    float lightAmbient[] = {0.3, 0.3, 0.3, 1    };
+    float lightAmbient[] = {0.3, 0.3, 0.3, 1};
     float lightDiffuse[] = {0.7, 0.7, 0.7, 1};
-    float lightSpecular[] = {0.2, 0.2, 0.2, 0.0}; //0.1
+    float lightSpecular[] = {0.2, 0.2, 0.2, 0.0};
     float lightDirection[] = {0, 0, 0};
     int i;
     for (i = 0; i < MAX_LIGHTS; i++) {
+        lightOn[i]=0;
         glLightfv(lights[i], GL_SPOT_DIRECTION, lightDirection);
         glLightfv(lights[i], GL_AMBIENT, lightAmbient);
         glLightfv(lights[i], GL_DIFFUSE, lightDiffuse);
@@ -99,6 +50,7 @@ void initLights()
     }
 }
 
+/*postavlja poziciju n-tog GL_LIGHT*/
 void setLightPos(int n, float x, float y, float z)
 {
     lightPos[n][0] = x;
@@ -107,16 +59,13 @@ void setLightPos(int n, float x, float y, float z)
     lightPos[n][3] = 1;
 }
 
-void materialSetup()
+/*inicijalna svojstva materijala*/
+void initMaterial()
 {
-    /* Koeficijenti ambijentalne refleksije materijala. */
     GLfloat ambient_coeffs[] = {0, 0, 0, 1};
-    //GLfloat ambient_coeffs[] = { 0.2, 0.2, 0.2, 1 };
-    /* Koeficijenti difuzne refleksije materijala. */
     GLfloat diffuse_coeffs[] = {0.4, 0.4, 0.4, 1};
-    /* Koeficijenti spekularne refleksije materijala. */
     GLfloat specular_coeffs[] = {0, 0, 0, 1};
-    GLfloat shininess = 0; //20
+    GLfloat shininess = 0;
 
     glMaterialfv(GL_FRONT, GL_AMBIENT, ambient_coeffs);
     glMaterialfv(GL_FRONT, GL_DIFFUSE, diffuse_coeffs);
@@ -124,14 +73,15 @@ void materialSetup()
     glMaterialf(GL_FRONT, GL_SHININESS, shininess);
 }
 
+/*na osnovu boje objekta postavlja materijale pred iscrtavanje*/
 void drawWithColor(Object* o)
 {
-    GLfloat diffuseCoeffs[] = {o->color[0], o->color[1], o->color[2],1};
+    GLfloat diffuseCoeffs[] = {o->color[0], o->color[1], o->color[2], 1};
     /*potamnjuje ambinet coeffs*/
     float s = 0; //0.3;
-    GLfloat ambientCoeffs[] = {o->color[0] * s, o->color[1] * s, o->color[2] * s,1};
-    GLfloat emissionCoeffs[] = {0.5,0.5,0.5,1};
-    GLfloat emissionCoeffs2[] = {0,0,0,0};
+    GLfloat ambientCoeffs[] = {o->color[0] * s, o->color[1] * s, o->color[2] * s, 1};
+    const float emissionCoeffs[] = {0.5, 0.5, 0.5, 1};
+    const float emissionCoeffs2[] = {0, 0, 0, 0};
     if (getColor(o) == WHITE) {
         glMaterialfv(GL_FRONT, GL_EMISSION, emissionCoeffs);
     } else {
@@ -155,7 +105,6 @@ void positionCam(void)
     /*azuriranje lookat na osnovu gore-dole rotacije*/
     lookAty = sin(M_PI * viewElevation.curr / 180);
     /*usmerava se pogled relativno od pozicije kamere*/
-    // printf("lookatx%f lookaty%f lookatz%f\n",lookAtx,lookAty,lookAtz);
     lookAtx = eyex + lookAtx;
     lookAtz = eyez + lookAtz;
     lookAty = eyey + lookAty;
@@ -165,11 +114,12 @@ void positionCam(void)
         upx, upy, upz);
 }
 
-void map()
+/*iscrtava sve blokove koji cine mapu*/
+void drawMap()
 {
-    int i;
-    for (i = 0; i < NUM_BLOCKS; i++) {
-        drawCube(blocks[i]);
+    ObjectNode* l;
+    for (l = Blocks; l != NULL; l = l->next){
+        drawCube(l->o);
     }
 }
 
@@ -199,41 +149,35 @@ void psychedelic(int interval)
     float displace = 1 - nice;
     float r, g, b;
     /*s je deo start boje, a e je deo end boje*/
-    for (i = 0; i < NUM_BLOCKS; i++) {
-        float e = (float) i / NUM_BLOCKS;
+    ObjectNode* l;
+    i=0;
+    for (l=Blocks; l!=NULL; l=l->next, i++){
+
+        float e = (float) i / NUM_OF_BLOCKS;
         float s = 1 - e;
-        if (getColor(blocks[i]) != WHITE) {
+        if (getColor(l->o) != WHITE) {
             r = start[0] * s + end[0] * e;
             g = start[1] * s + end[1] * e;
             b = start[2] * s + end[2] * e;
             r = r * nice + displace * rand() / (float)(RAND_MAX);
             g = g * nice + displace * rand() / (float)(RAND_MAX);
             b = b * nice + displace * rand() / (float)(RAND_MAX);
-            setColor(blocks[i], r, g, b);
+            setColor(l->o, r, g, b);
         }
     }
 }
 
-void initCubes()
-{
-    int i;
-    for (i = 0; i < NUM_BLOCKS; i++) {
-        free(blocks[i]);
-    }
-    NUM_BLOCKS = 0;
-    loadBlocks();
-}
-
+/*iscrtava sve aktivne metke*/
 void drawBullets(void) {
     float x, y, z;
     int i;
     for (i = 0; i < MAX_BULLETS; i++) {
-        if (bullets_active[i]) {
+        if (bulletsActive[i]) {
             x = bullets[i].posx, y = bullets[i].posy, z = bullets[i].posz;
             glPushMatrix();
             glTranslatef(x, y, z);
-            drawWithColor( & bullets[i]);
-            glutSolidSphere(bullets[i].length, 20, 10);
+            drawWithColor(&bullets[i]);
+            glutSolidSphere(bullets[i].length / 2, 20, 10);
             glPopMatrix();
         }
     }

@@ -8,10 +8,11 @@
 #include "miscfunc.h"
 #include "collision.h"
 #include "draw.h"
-
-static void onDisplay(void);
+#include "blocks.h"
 int dt;
-void onTimerUpdate(int id);
+static int oldDisplayTime;
+static void onTimerUpdate(int id);
+static void onDisplay(void);
 static void updateDeltaTime(void);
 static void fps(int print);
 
@@ -21,7 +22,7 @@ int main(int argc, char** argv)
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
 
     glutInitWindowSize(aspectRatio * initWindowHeight, initWindowHeight);
-    glutInitWindowPosition(0,0);
+    glutInitWindowPosition(0, 0);
     glutCreateWindow("Paint the Way");
     glutDisplayFunc(onDisplay);
     glutReshapeFunc(onReshape);
@@ -38,16 +39,14 @@ int main(int argc, char** argv)
     glEnable(GL_NORMALIZE);
     glutSetCursor(GLUT_CURSOR_NONE);
     glutIgnoreKeyRepeat(GL_TRUE);
-    loadBlocks();
     glDepthMask(GL_TRUE);
 	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LEQUAL);
     glEnable(GL_SMOOTH);
     glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
     glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
     glClearColor(0, 0, 0, 0);
     resetGame();
-    dt=glutGet(GLUT_ELAPSED_TIME);
+    oldDisplayTime=dt=glutGet(GLUT_ELAPSED_TIME);
     srand(time(NULL));
     glutTimerFunc(UPDATE_TIMER_INTERVAL, onTimerUpdate,TIMER_UPDATE_ID);
     glutMainLoop();
@@ -63,15 +62,14 @@ void onDisplay(void)
     positionCam();
 
     lightSetup();
-    materialSetup();
 
-    map();
+    drawMap();
     drawBullets();
 
     glutSwapBuffers();
 }
 
-/*funkcija za azuriranje polozaja objekata*/
+/*funkcija za azuriranje polozaja objekata i obradu svih dogadjaja*/
 void onTimerUpdate(int id)
 {
     if (TIMER_UPDATE_ID != id){
@@ -88,30 +86,43 @@ void onTimerUpdate(int id)
     glutTimerFunc(UPDATE_TIMER_INTERVAL, onTimerUpdate, TIMER_UPDATE_ID);
 }
 
-#define DT_MAX 60
+/*racunanje dt-vremena izmedju 2 poziva onTimerUpdate funkcije*/
+#define DT_MAX 100
 static int newTime;
 static int oldTime = 0;
 static int timeSum = 0;
-/*racunanje dt-vremena izmedju 2 poziva onTimerUpdate funkcije*/
+
 void updateDeltaTime(void)
 {
     newTime=glutGet(GLUT_ELAPSED_TIME);
     dt = newTime - oldTime;
     oldTime = newTime;
     timeSum += dt;
-    if (dt>DT_MAX)
-        dt=DT_MAX;
-    //printf("dt=%d\n",dt);
+    if (dt > DT_MAX)
+        dt = DT_MAX;
 }
 
 /*racuna frames per second*/
+static int newDisplayTime;
+#define SECOND 1000
+
 void fps(int print)
 {
+    newDisplayTime = glutGet(GLUT_ELAPSED_TIME);
+    int diff = newDisplayTime - oldDisplayTime;
+    oldDisplayTime=newDisplayTime;
+    /*max i min vreme izmedju 2 frejma*/
+    static int maxTime = 0, minTime = SECOND;
+    maxTime = diff>maxTime ? diff : maxTime;
+    minTime = diff<minTime ? diff : minTime;
     static int frame = 0;
     frame++;
-    if (print && timeSum >= 1000){
-        printf("fps:%f\n",frame*1000/(float)timeSum);
+    if (print && timeSum >= SECOND){
+        printf("fps:%.2f minTime=%d maxTime=%d\n",
+            frame * SECOND / (float)timeSum, minTime, maxTime);
         timeSum = 0;
         frame = 0;
+        maxTime = 0;
+        minTime = SECOND;
     }
 }

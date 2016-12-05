@@ -5,18 +5,26 @@ static int KEY_W = 0;
 static int KEY_S = 0;
 static int KEY_A = 0;
 static int KEY_D = 0;
+static int KEY_Q = 0;
+static int KEY_SPACE = 0;
 static int fullScreen = 0;
 float initWindowHeight = 800;
-static float viewAzimuthdt = 15, viewElevationdt = 5;
+static float viewAzimuthdt = 5, viewElevationdt = 3;
+static float mouseSensitivity=0.01;
 float aspectRatio = 16 / 9.0;
 
 void onMouseButton(int button, int pressed, int x, int y)
 {
+    //printf("pokusavam brt\n");
     if (button == GLUT_LEFT_BUTTON) {
 
         if (pressed == GLUT_DOWN) {
             firePaint();
-
+        }
+    }
+    if (button == GLUT_RIGHT_BUTTON) {
+        if (pressed == GLUT_DOWN) {
+            fireBlackPaint();
         }
     }
 }
@@ -49,8 +57,8 @@ void onMouseLook(int x, int y)
     prevMouseX = x;
     prevMouseY = y;
     // printf("deltax: %f, deltay: %f\n",deltaX,deltaY);
-    viewAzimuth.curr += deltaX * viewAzimuthdt / 100;
-    viewElevation.curr -= deltaY * viewElevationdt / 100;
+    viewAzimuth.curr += deltaX * viewAzimuthdt * mouseSensitivity;
+    viewElevation.curr -= deltaY * viewElevationdt * mouseSensitivity;
     /*proveri da l su azimut i elevacija 0 do 360 i -max do max*/
     if (viewAzimuth.curr >= 360) {
         viewAzimuth.curr -= 360;
@@ -72,20 +80,25 @@ void onMousePressedLook(int x, int y)
 }
 
 static const float moveSpeed=0.05;
+#define NORM_SPEED 0.1
 void onKeyHold()
 {
     /*ako ide brzo a nije na narandzastom */
-    if (fabsf(player.vz.curr > 0.1) && !state.goFast)
+    if (fabsf(player.vz.curr > NORM_SPEED) && !state.goFast)
         return;
-    float bonus = (state.goFast) ? 0.1 : 0;
+    float bonus = (state.goFast) ? NORM_SPEED : 0;
     if (KEY_W)
         player.vz.goal = moveSpeed + bonus;
     if (KEY_S)
-        player.vz.goal = -moveSpeed - bonus;
+        player.vz.goal = -(moveSpeed + bonus);
     if (KEY_A)
-        player.vx.goal = -moveSpeed - bonus;
+        player.vx.goal = -(moveSpeed + bonus);
     if (KEY_D)
         player.vx.goal = moveSpeed + bonus;
+    if (state.flying && KEY_SPACE)
+        jump();
+    if (state.flying && KEY_Q)
+        flyDown();
 }
 
 /*ne treba mi vise al nek stoji za ukras*/
@@ -102,131 +115,157 @@ void onSpecialInputUp(int key, int x, int y)
 
 void onSpecialInput(int key, int x, int y)
 {
-    if (state.newGame){
+    if (state.newGame && key != GLUT_KEY_F10){
         return;
     }
 
     switch (key) {
-    case (GLUT_KEY_RIGHT):
-        viewAzimuth.curr += viewAzimuthdt;
-        break;
-    case (GLUT_KEY_LEFT):
-        viewAzimuth.curr -= viewAzimuthdt;
-        break;
-    case (GLUT_KEY_UP):
-        viewElevation.curr += viewElevationdt;
-        if (viewElevation.curr > MAX_ELEVATION)
-            viewElevation.curr = MAX_ELEVATION;
-        break;
-    case (GLUT_KEY_DOWN):
-        viewElevation.curr -= viewElevationdt;
-        if (viewElevation.curr < -MAX_ELEVATION)
-            viewElevation.curr = -MAX_ELEVATION;
-        break;
+        case (GLUT_KEY_F1):
+            saveMap();
+            break;
+        case (GLUT_KEY_F2):
+            loadMap(0);
+            break;
+        case (GLUT_KEY_F5):
+            resetGame();
+            break;
+        case (GLUT_KEY_F10):
+            fullScreen = 1;
+            glutFullScreen();
+            break;
+        case (GLUT_KEY_RIGHT):
+            viewAzimuth.curr += viewAzimuthdt;
+            break;
+        case (GLUT_KEY_LEFT):
+            viewAzimuth.curr -= viewAzimuthdt;
+            break;
+        case (GLUT_KEY_UP):
+            viewElevation.curr += viewElevationdt;
+            if (viewElevation.curr > MAX_ELEVATION)
+                viewElevation.curr = MAX_ELEVATION;
+            break;
+        case (GLUT_KEY_DOWN):
+            viewElevation.curr -= viewElevationdt;
+            if (viewElevation.curr < -MAX_ELEVATION)
+                viewElevation.curr = -MAX_ELEVATION;
+            break;
     }
 }
 
 void onKeyboardUp(unsigned char key, int x, int y)
 {
     switch (key) {
-    case ('a'):
-    case ('A'):
-        KEY_A = 0;
-        player.vx.goal = 0;
-        break;
-    case ('d'):
-    case ('D'):
-        KEY_D = 0;
-        player.vx.goal = 0;
-        break;
-    case ('w'):
-    case ('W'):
-        KEY_W = 0;
-        player.vz.goal = 0;
-        break;
-    case ('s'):
-    case ('S'):
-        KEY_S = 0;
-        player.vz.goal = 0;
-        break;
+        case ('h'):
+            countList(Blocks);
+            break;
+        case ('a'):
+        case ('A'):
+            KEY_A = 0;
+            player.vx.goal = 0;
+            break;
+        case ('d'):
+        case ('D'):
+            KEY_D = 0;
+            player.vx.goal = 0;
+            break;
+        case ('w'):
+        case ('W'):
+            KEY_W = 0;
+            player.vz.goal = 0;
+            break;
+        case ('s'):
+        case ('S'):
+            KEY_S = 0;
+            player.vz.goal = 0;
+            break;
+        case (' '):
+            KEY_SPACE = 0;
+            break;
+        case ('q'):
+            KEY_Q=0;
+            break;
     }
+
 }
 
 void onKeyboard(unsigned char key, int x, int y)
 {
     /*na samom pocetku blokira se input dok igrac ne ispali boju*/
-    if (state.newGame && key != 'f' && key != 'F' &&
-    key != 'r' && key != 'R' && key != ESC){
+    if (state.newGame && key != 'f' && key != 'F' && key != ESC){
         return;
     }
     switch (key) {
-    case ('f'):
-    case ('F'):
-        firePaint();
-        break;
-    case (' '):
-        if (!state.jumping) {
-            player.vy.goal = JUMP_V + state.bigJump * 0.1;
-            state.bigJump = 0;
-            state.jumping = 1;
-        }
-        break;
-    case ('s'):
-    case ('S'):
-        KEY_S = 1;
-        player.vz.goal = -0.05 - state.goFast * 0.15;
-        break;
-    case ('w'):
-    case ('W'):
-        KEY_W = 1;
-        player.vz.goal = 0.05 + state.goFast * 0.15;
-        break;
-    case ('a'):
-    case ('A'):
-        KEY_A = 1;
-        player.vx.goal = -0.05 - state.goFast * 0.15;
-        break;
-    case ('d'):
-    case ('D'):
-        KEY_D = 1;
-        player.vx.goal = 0.05 + state.goFast * 0.15;
-        break;
-    case ('r'):
-    case ('R'):
-        fullScreen = 1;
-        resetGame();
-        glutFullScreen();
-        break;
-    case ('1'):
-        state.fireColor = WHITE;
-        break;
-    case ('2'):
-        state.fireColor = BLUE;
-        break;
-    case ('3'):
-        state.fireColor = ORANGE;
-        break;
-    case ('4'):
-        printf("%f, %f, %f\n", player.posx, player.posy, player.posz);
-        showFps = !showFps;
-        break;
-    case ('0'):
-        player.posy = 11.8, player.posx = 0, player.posz = -18;
-        break;
-    case ('p'):
-        if (!releaseMouse) {
-            glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
-            releaseMouse = 1;
-        } else {
-            glutSetCursor(GLUT_CURSOR_NONE);
-            releaseMouse = 0;
-        }
-        break;
-    case (ESC):
-        exit(0);
-        break;
+        case ('f'):
+        case ('F'):
+            firePaint();
+            break;
+        case (' '):
+            KEY_SPACE = 1;
+            jump();
+            break;
+        case ('s'):
+        case ('S'):
+            KEY_S = 1;
+            player.vz.goal = -0.05 - state.goFast * 0.15;
+            break;
+        case ('w'):
+        case ('W'):
+            KEY_W = 1;
+            player.vz.goal = 0.05 + state.goFast * 0.15;
+            break;
+        case ('a'):
+        case ('A'):
+            KEY_A = 1;
+            player.vx.goal = -0.05 - state.goFast * 0.15;
+            break;
+        case ('d'):
+        case ('D'):
+            KEY_D = 1;
+            player.vx.goal = 0.05 + state.goFast * 0.15;
+            break;
+        case ('1'):
+            state.fireColor = WHITE;
+            break;
+        case ('2'):
+            state.fireColor = BLUE;
+            break;
+        case ('3'):
+            state.fireColor = ORANGE;
+            break;
+        case ('4'):
+            printf("%f, %f, %f\n", player.posx, player.posy, player.posz);
+            showFps = !showFps;
+            break;
+        case ('5'):
+            toggleBuildMode();
+            break;
+        case ('0'):
+            /*teleport na kraj za lakse testiranje*/
+            player.posy = 11.8, player.posx = 0, player.posz = -18;
+            break;
+        case ('p'):
+            if (!releaseMouse) {
+                glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
+                releaseMouse = 1;
+            } else {
+                glutSetCursor(GLUT_CURSOR_NONE);
+                releaseMouse = 0;
+            }
+            break;
+        case ('q'):
+            KEY_Q=1;
+            flyDown();
+            break;
+        case ('+'):
+            mouseSensitivity *= 1.2;
+            break;
+        case ('-'):
+            mouseSensitivity *= 0.8;
+            break;
+        case (ESC):
+            exit(0);
+            break;
     }
-    //printf("feet pos: x=%f, y=%f, z=%f\n",player.posx,player.posy-player.height/2,player.posz);
 }
 
 void onReshape(int width, int height)
