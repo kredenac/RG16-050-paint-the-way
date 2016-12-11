@@ -53,12 +53,10 @@ static float* moveRightCam(void);
 static float* moveForwardCam(int yZero);
 static int firstFreeLight(void);
 
-/*lastpos - prosla pozicija se pamti zbog racuna pri koliziji*/
-float lastPosx, lastPosz, lastPosy;
+/*azuriranje brzina i pozicije igraca*/
 void movePlayer()
 {
     float d = dt / (float) UPDATE_INTERVAL;
-    //printf("DISTANCE=%f\n",d);
     /*ako je neko dugme pritisnuto azuriraj brzine*/
     onKeyHold();
     /*jedino ako je igrac u vazduhu ima razloga da ga teram dole*/
@@ -192,11 +190,11 @@ void paintBlock(Object* block, Object* bullet)
 {
     /*ako treba obojiti beli blok onda iskljuci njegovo svetlo*/
     if (getColor(block) == WHITE) {
-        int k;
-        for (k = 0; k < MAX_LIGHTS; k++) {
-            if (lightBlock[k] == block) {
-                lightOn[k] = 0;
-                lightAge[k] = 0;
+        int i;
+        for (i = 0; i < MAX_LIGHTS; i++) {
+            if (lightBlock[i] == block) {
+                lightOn[i] = 0;
+                lightAge[i] = 0;
             }
         }
     }
@@ -205,7 +203,8 @@ void paintBlock(Object* block, Object* bullet)
         int n = firstFreeLight();
         lightBlock[n] = block;
         lightOn[n] = 1;
-        lightAge[n] = glutGet(GLUT_ELAPSED_TIME); //vreme kada je stavljeno
+        /*vreme kada je postavljeno svetlo*/
+        lightAge[n] = glutGet(GLUT_ELAPSED_TIME);
         setLightPos(n, bullet->posx, bullet->posy, bullet->posz);
         psychedelic(1);
     }
@@ -217,7 +216,7 @@ void paintBlock(Object* block, Object* bullet)
 int firstFreeLight(void)
 {
     int i;
-    /*ne mogu biti stariji od trenutnog vremena*/
+    /*ne mogu biti mladji od trenutnog vremena*/
     int oldest = glutGet(GLUT_ELAPSED_TIME) + 1;
     int oldestIndex;
     for (i = 0; i < MAX_LIGHTS; i++) {

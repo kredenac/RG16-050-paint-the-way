@@ -186,8 +186,8 @@ void bulletCollision(void)
     }
 }
 
-/*kada se brisu blokovi koji svetle oni se prvo oboje u crno, i iskljuci se
-svetlo, tako da ovde ne treba da pazim o tome*/
+/*u build modu sve boje osim crne stvore novi blok pri sudaru sa postojecim.*/
+/*crna boja brise postojece blokove*/
 void bulletCollisionBuildMode(Object* bullet, ObjectNode* blockNode)
 {
     if (!state.buildMode)
@@ -198,7 +198,7 @@ void bulletCollisionBuildMode(Object* bullet, ObjectNode* blockNode)
     if (getColor(bullet) == BLACK) {
         removeNode(&Blocks, blockNode);
         return;
-    /*inace napravi novi blok sa one strane bloka gde je udario metak*/
+    /*inace napravi novi blok sa one strane bloka gde je udario metak.*/
     /**postavi ga iznad*/
     } else if (isAbove(bullet, block)) {
         y = block->posy + block->height / 2 + sizey / 2;

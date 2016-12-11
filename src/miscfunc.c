@@ -76,7 +76,7 @@ Color getColor(Object* o)
     return OTHER;
 }
 
-/*zbog reprezentacije float-a cesto ne budu jednaki kada ih poredim bez castovanja*/
+/*zbog reprezentacije float-a cesto ne bude jednak pri poredjenju sa litelarom*/
 /*takodje sluzi ako ne insistiram da boje moraju biti bas identicne*/
 static const float eps = 0.01;
 
