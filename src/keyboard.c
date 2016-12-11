@@ -15,7 +15,6 @@ float aspectRatio = 16 / 9.0;
 
 void onMouseButton(int button, int pressed, int x, int y)
 {
-    //printf("pokusavam brt\n");
     if (button == GLUT_LEFT_BUTTON) {
 
         if (pressed == GLUT_DOWN) {
@@ -31,7 +30,7 @@ void onMouseButton(int button, int pressed, int x, int y)
 
 static float prevMouseX = 500;
 static float prevMouseY = 500;
-/*nakon poziva funkcije glutWarpPointer se postavi kursor u centar.
+/*nakon poziva funkcije glutWarpPointer postavi se kursor u centar.
 Zbog toga glutmainloop opet pozove onMouseLook i tako u krug.
 Da bi se izignorisalo dejstvo tog poziva prekida se izvrsavanje funkcije
 ako je kursor u centru*/
@@ -46,17 +45,19 @@ void onMouseLook(int x, int y)
     float deltaX;
     float deltaY;
     if (releaseMouse) {
+        /*pomeraj u odnosu na proslu poziciju*/
         deltaX = x - prevMouseX;
         deltaY = y - prevMouseY;
     } else {
+        /*pomeraj u odnosu na centar*/
         deltaX = x - width / 2;
         deltaY = y - height / 2;
         glutWarpPointer(width / 2, height / 2);
     }
+    /*blokira se pomeranje kamere na pocetku igre*/
     if (state.newGame) return;
     prevMouseX = x;
     prevMouseY = y;
-    // printf("deltax: %f, deltay: %f\n",deltaX,deltaY);
     viewAzimuth.curr += deltaX * viewAzimuthdt * mouseSensitivity;
     viewElevation.curr -= deltaY * viewElevationdt * mouseSensitivity;
     /*proveri da l su azimut i elevacija 0 do 360 i -max do max*/
@@ -83,7 +84,7 @@ static const float moveSpeed=0.05;
 #define NORM_SPEED 0.1
 void onKeyHold()
 {
-    /*ako ide brzo a nije na narandzastom */
+    /*ako ide brzo a nije u stanju goFast, tj nije na narandzastom*/
     if (fabsf(player.vz.curr > NORM_SPEED) && !state.goFast)
         return;
     float bonus = (state.goFast) ? NORM_SPEED : 0;
@@ -182,6 +183,7 @@ void onKeyboardUp(unsigned char key, int x, int y)
             KEY_SPACE = 0;
             break;
         case ('q'):
+        case ('Q'):
             KEY_Q=0;
             break;
     }
@@ -239,11 +241,8 @@ void onKeyboard(unsigned char key, int x, int y)
         case ('5'):
             toggleBuildMode();
             break;
-        case ('0'):
-            /*teleport na kraj za lakse testiranje*/
-            player.posy = 11.8, player.posx = 0, player.posz = -18;
-            break;
         case ('p'):
+        case ('P'):
             if (!releaseMouse) {
                 glutSetCursor(GLUT_CURSOR_LEFT_ARROW);
                 releaseMouse = 1;
@@ -253,6 +252,7 @@ void onKeyboard(unsigned char key, int x, int y)
             }
             break;
         case ('q'):
+        case ('Q'):
             KEY_Q=1;
             flyDown();
             break;
@@ -277,5 +277,5 @@ void onReshape(int width, int height)
     glViewport(0, 0, width, height);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
-    gluPerspective(60.0, (float) width / height, 0.1, 100.0);
+    gluPerspective(60.0, (float) width / height, 0.1, 1000.0);
 }

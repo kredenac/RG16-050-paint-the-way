@@ -45,9 +45,7 @@ void freeList(ObjectNode** listHead)
         /* Potrebno je prvo zapamtiti adresu sledeceg cvora i onda
         osloboditi cvor koji predstavlja glavu liste */
         p = (*listHead)->next;
-        if ((*listHead)->o==NULL ) printf("*listHead->0 je NULL\n");
         free((*listHead)->o);
-        if ((*listHead)==NULL ) printf("*listHead je NULL\n");
         free(*listHead);
 
         /* Sledeci cvor je nova glava liste */
@@ -71,7 +69,6 @@ void removeNode(ObjectNode** listHead, ObjectNode* rm)
     /*ako je bas prvi element liste onaj koji treba da se ukloni*/
     if (*listHead == rm ){
         (*listHead)=rm->next;
-        if (rm->o == NULL || rm==NULL ) printf("rm je NULL\n");
         free(rm->o);
         free(rm);
         NUM_OF_BLOCKS--;
@@ -83,7 +80,6 @@ void removeNode(ObjectNode** listHead, ObjectNode* rm)
     while (l != NULL){
         if (l->next == rm ){
             l->next = rm->next;
-            if (rm->o == NULL || rm==NULL ) printf("rm je NULL (while)\n");
             free(rm->o);
             free(rm);
             NUM_OF_BLOCKS--;

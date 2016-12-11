@@ -87,6 +87,8 @@ void onTimerUpdate(int id)
 }
 
 /*racunanje dt-vremena izmedju 2 poziva onTimerUpdate funkcije*/
+/*potrebno je znati delta time posto ce na sporijim racunarima
+redje da se poziva Timer. Zbog toga svi pomeraji se vrse srazmerno sa dt*/
 #define DT_MAX 100
 static int newTime;
 static int oldTime = 0;
@@ -109,8 +111,9 @@ static int newDisplayTime;
 void fps(int print)
 {
     newDisplayTime = glutGet(GLUT_ELAPSED_TIME);
+    /*proteklo vreme izmedju 2 iscrtavanja*/
     int diff = newDisplayTime - oldDisplayTime;
-    oldDisplayTime=newDisplayTime;
+    oldDisplayTime = newDisplayTime;
     /*max i min vreme izmedju 2 frejma*/
     static int maxTime = 0, minTime = SECOND;
     maxTime = diff>maxTime ? diff : maxTime;
